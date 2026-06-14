@@ -19,34 +19,34 @@
 
 ### 현재 소비기한 상태
 
-- `tracked`: 현재 소비기한이 등록된 상태
-- `empty`: 다음 소비기한이 비어 있지만 계속 추적해야 하는 상태
+- `expiration_date`가 있으면 현재 소비기한이 등록된 상태
+- `expiration_date`가 `NULL`이면 다음 소비기한이 비어 있지만 계속 추적해야 하는 상태
 
 ### 상태 전이표
 
 ```text
-active + tracked(date)
+active + expiration_date 있음
   -> 폐기 처리
-  -> 다음 소비기한 입력: active + tracked(new_date)
-  -> 다음 소비기한 없음: active + empty
+  -> 다음 소비기한 입력: active + 새 expiration_date
+  -> 다음 소비기한 없음: active + expiration_date NULL
 
-active + empty
-  -> 소비기한 확인됨: active + tracked(date)
-  -> 관리 중단: archived + empty
+active + expiration_date NULL
+  -> 소비기한 확인됨: active + expiration_date 있음
+  -> 관리 중단: archived + expiration_date NULL
 
-active + tracked(date)
-  -> 관리 중단: archived + empty
+active + expiration_date 있음
+  -> 관리 중단: archived + expiration_date NULL
 
-archived + empty
-  -> 다시 관리 시작: active + empty
+archived + expiration_date NULL
+  -> 다시 관리 시작: active + expiration_date NULL
 ```
 
 ### 전이 원칙
 
 1. 폐기 처리는 반드시 다음 상태 입력과 함께 완료한다.
-2. 다음 상태는 `새 소비기한 입력` 또는 `empty 적용` 중 하나여야 한다.
+2. 다음 값은 `새 소비기한 입력` 또는 `expiration_date = NULL` 적용 중 하나여야 한다.
 3. 상품은 삭제하지 않고 `active`와 `archived` 사이에서만 전환한다.
-4. 아카이브 복구 시 기본 상태는 `active + empty`이다.
+4. 아카이브 복구 시 기본값은 `active + expiration_date NULL`이다.
 
 ## 2. DB 스키마 초안
 
@@ -78,15 +78,14 @@ expiration_states
 - id
 - product_id unique
 - expiration_date nullable
-- state tracked|empty
 - updated_at
 ```
 
 설명:
 
 - 각 상품은 현재 소비기한 상태 row를 하나만 가진다.
-- `state = tracked`이면 `expiration_date`가 채워진다.
-- `state = empty`이면 `expiration_date`는 비울 수 있다.
+- `expiration_date`가 채워져 있으면 현재 추적 중인 소비기한이 있는 상태다.
+- `expiration_date`가 `NULL`이면 다음 소비기한이 아직 없거나 확인되지 않은 상태다.
 - 소비기한이 바뀌면 새 row를 추가하지 않고 기존 row를 갱신한다.
 
 ### discard_histories
@@ -118,7 +117,6 @@ discard_histories
 조건:
 
 - `products.status = active`
-- `expiration_states.state = tracked`
 - `expiration_states.expiration_date <= tomorrow`
 
 이 섹션에는 아래 상품이 모두 포함됩니다.
@@ -132,18 +130,19 @@ discard_histories
 조건:
 
 - `products.status = active`
-- `expiration_states.state = empty`
+- `expiration_states.expiration_date IS NULL`
 
 이 섹션은 다음 소비기한을 아직 확인하지 못한 상품을 보여준다.
+이 섹션은 처리 대상 섹션과 분리되지만, 메인 대시보드의 같은 화면 안에 함께 배치된다.
 
 ### 운영 메모
 
 1. 일부 상품은 점포 운영 원칙에 따라 소비기한 전날 폐기할 수 있다.
 2. 따라서 `expiration_date <= tomorrow` 조건이 필요하다.
-3. `empty` 상품은 날짜 비교가 아니라 별도 섹션으로 관리한다.
+3. `expiration_date`가 `NULL`인 상품은 날짜 비교가 아니라 같은 화면 안의 별도 섹션으로 관리한다.
 
 ## 4. 구현 시 확인할 사항
 
-1. 폐기 처리 UI에서 `수량 입력 -> 다음 소비기한 입력 또는 empty 적용`이 한 흐름으로 이어져야 한다.
+1. 폐기 처리 UI에서 `수량 입력 -> 다음 소비기한 입력 또는 expiration_date NULL 적용`이 한 흐름으로 이어져야 한다.
 2. 메인 대시보드에서 처리 대상과 미확인 대상을 분리해 보여주더라도, 상태 저장 규칙은 단순하게 유지한다.
 3. 분석 기능은 MVP 범위 밖이지만, 폐기 이력은 이후 집계를 고려해 누적 저장한다.
