@@ -58,7 +58,7 @@ MVP 구조를 빠르게 맞춰보기 위한 개념 메모다.
 | `barcode` | 바코드 |
 | `name` | 상품명 |
 | `status` | 현재 사용 상태 |
-| `archived_at` | 보관 종료 시점 |
+| `archived_at` | 아카이빙 시점 |
 
 ### `expiration_states`
 
@@ -66,7 +66,7 @@ MVP 구조를 빠르게 맞춰보기 위한 개념 메모다.
 | --- | --- |
 | `id` | 상태 row 식별자 |
 | `product_id` | 어떤 상품의 현재 소비기한 상태인지 연결 |
-| `expiration_date` | 현재 추적 중인 소비기한. 비어 있으면 아직 다음 소비기한이 없는 상태 |
+| `expiration_date` | 현재 추적 중인 소비기한. `NULL`이면 아직 다음 소비기한이 없거나 확인되지 않은 상태 |
 | `updated_at` | 마지막 갱신 시점 |
 
 ### `discard_histories`
@@ -85,3 +85,6 @@ MVP 구조를 빠르게 맞춰보기 위한 개념 메모다.
 3. `expiration_date`가 있으면 현재 추적 중인 소비기한이 있는 상태다.
 4. `expiration_date`가 `NULL`이면 다음 소비기한이 아직 없거나 확인되지 않은 상태다.
 5. `expired`, `due_today`, `due_tomorrow` 같은 분류는 컬럼으로 저장하지 않고 조회할 때 계산한다.
+6. `NULL`은 오류가 아니라, 다시 확인이 필요한 정상 상태다.
+7. 상품은 소비기한 없이 먼저 등록할 수 있다.
+8. 상품이 `archived`로 바뀌면 `expiration_date`는 `NULL`로 비운다.
