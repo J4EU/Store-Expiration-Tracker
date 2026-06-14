@@ -35,6 +35,11 @@
 
 ## 문서
 
-- [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md)
-- [문제 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/problem.md)
-- [MVP](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp.md)
+권장 읽기 순서는 아래와 같습니다.
+
+1. [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md)
+2. [문제 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/problem.md)
+3. [MVP](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp.md)
+4. [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)
+5. [MVP Implementation Outline](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-implementation-outline.md)
+6. [Tech Stack Decision](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/tech-stack-decision.md)
