@@ -15,13 +15,26 @@ uvicorn app.main:app --reload
 ```
 
 서버를 실행하면 DB 파일은 `data/store_expiry_manager.db`에 자동 생성된다.
+API 문서는 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)에서 확인할 수 있다.
+
+## 현재 위치
+
+- 백엔드는 FastAPI 기반으로 구현한다.
+- 프론트엔드는 Vue로 별도 구현할 계획이다.
+- API 범위와 상태 규칙은 `docs/backend-implementation-guide.md`를 기준으로 맞춘다.
+- 프론트 1차 화면 범위는 `docs/frontend-v1-implementation.md`를 기준으로 맞춘다.
 
 ## 현재 API
 
 - `GET /health`
+- `GET /`
 - `POST /products`
 - `GET /dashboard`
+- `PATCH /products/{product_id}/expiration`
 - `POST /discards`
+
+현재 API 목록은 구현 진행에 따라 변경될 수 있다.
+구현 기준으로는 아카이브/복구/상품 수정/아카이브 조회 API도 1차 범위에 포함한다.
 
 ## 예시 요청
 
