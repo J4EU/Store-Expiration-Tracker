@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS products (
         CHECK (length(trim(barcode)) > 0),
     name TEXT NOT NULL
         CHECK (length(trim(name)) > 0),
+    category TEXT
+        CHECK (category IS NULL OR length(trim(category)) > 0),
     status TEXT NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'archived')),
     archived_at TEXT
@@ -64,6 +66,9 @@ END;
 
 CREATE INDEX IF NOT EXISTS idx_products_status
     ON products (status);
+
+CREATE INDEX IF NOT EXISTS idx_products_barcode
+    ON products (barcode);
 
 CREATE INDEX IF NOT EXISTS idx_expiration_states_expiration_date
     ON expiration_states (expiration_date);
