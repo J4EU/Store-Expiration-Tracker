@@ -96,11 +96,10 @@
 
 - 처리:
   - `discard_histories`에 기록 추가
-  - `expiration_states.expiration_date`를 새 값 또는 `NULL`로 갱신
+  - `expiration_states.expiration_date`를 `NULL`로 갱신
 
 - 결과:
-  - 새 소비기한이 있으면 메인 처리 대상에 남을 수 있다.
-  - 새 소비기한이 없으면 `미확인` 사이드바 대상으로 이동한다.
+  - 폐기 직후 상품은 `미확인` 사이드바 대상으로 이동한다.
 
 ### 아카이빙
 
@@ -124,20 +123,21 @@
 
 - `products.status = active`
 - `expiration_date IS NOT NULL`
-- `expiration_date <= reference_date + 1 day`
 
 분류:
 
 - 지난 상품
 - 오늘 만료
 - 내일 상품
+- 이후 상품
 
 정렬:
 
 1. 지난 상품
 2. 오늘 만료
 3. 내일 상품
-4. 같은 분류 안에서는 `expiration_date` 오름차순
+4. 이후 상품
+5. 같은 분류 안에서는 `expiration_date` 오름차순
 
 ### 미확인 대상
 
@@ -178,6 +178,21 @@
 
 - 바코드가 기존 상품과 매칭되면 새 상품을 만들지 않는다.
 - 신규 상품 생성이 필요한 경우에만 `name` 입력이 필요하다.
+
+### `GET /products/by-barcode`
+
+역할:
+
+- 바코드 기반 등록 흐름에서 기존 상품 존재 여부 확인
+
+입력:
+
+- `barcode`
+
+반환:
+
+- `found`
+- `product` optional
 
 ### `GET /dashboard`
 
@@ -228,7 +243,6 @@
 - `product_id`
 - `discarded_date`
 - `quantity`
-- `next_expiration_date` optional
 
 ### `PATCH /products/{product_id}/archive`
 
