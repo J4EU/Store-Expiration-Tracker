@@ -13,6 +13,13 @@ import {
   updateProduct,
 } from "./api";
 
+const DEFAULT_CATEGORY = "미선택";
+const DAIRY_CATEGORY = "유제품";
+const CATEGORY_OPTIONS = [
+  { value: DEFAULT_CATEGORY, label: "미선택" },
+  { value: DAIRY_CATEGORY, label: "유제품" },
+];
+
 function formatLocalDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -44,6 +51,20 @@ function classifyDueItem(item, referenceDate) {
   return "future";
 }
 
+function normalizeCategory(category) {
+  return category === DAIRY_CATEGORY ? DAIRY_CATEGORY : DEFAULT_CATEGORY;
+}
+
+function isTodayProcessingItem(item, referenceDate) {
+  const type = classifyDueItem(item, referenceDate);
+
+  if (type === "past" || type === "today") {
+    return true;
+  }
+
+  return type === "tomorrow" && normalizeCategory(item.category) === DAIRY_CATEGORY;
+}
+
 function statusLabel(type) {
   if (type === "past") {
     return "지난 상품";
@@ -66,7 +87,7 @@ function statusLabel(type) {
 
 const referenceDate = ref(formatLocalDate(new Date()));
 const currentView = ref("dashboard");
-const dueFilter = ref("all");
+const dueFilter = ref("today_processing");
 const dashboardLoading = ref(false);
 const archiveLoading = ref(false);
 const savingModal = ref(false);
@@ -94,7 +115,7 @@ const modal = reactive({
   open: false,
   barcode: "",
   expirationDate: "",
-  category: "",
+  category: DEFAULT_CATEGORY,
   name: "",
   lookupResult: null,
   step: "barcode",
@@ -102,68 +123,75 @@ const modal = reactive({
 });
 
 const dueTabs = [
+  { id: "today_processing", label: "오늘 처리" },
   { id: "all", label: "전체" },
-  { id: "past", label: "지난 상품" },
-  { id: "today", label: "오늘 만료" },
-  { id: "tomorrow", label: "내일 상품" },
-  { id: "future", label: "이후 상품" },
 ];
 
 const dueCounts = computed(() => {
   const counts = {
+    today_processing: 0,
     all: dashboard.dueItems.length,
-    past: 0,
-    today: 0,
-    tomorrow: 0,
-    future: 0,
   };
 
   for (const item of dashboard.dueItems) {
-    counts[classifyDueItem(item, referenceDate.value)] += 1;
+    if (isTodayProcessingItem(item, referenceDate.value)) {
+      counts.today_processing += 1;
+    }
   }
 
   return counts;
 });
 
 const filteredDueItems = computed(() => {
+  if (dueFilter.value === "today_processing") {
+    return dashboard.dueItems.filter((item) =>
+      isTodayProcessingItem(item, referenceDate.value),
+    );
+  }
+
   if (dueFilter.value === "all") {
     return dashboard.dueItems;
   }
 
-  return dashboard.dueItems.filter(
-    (item) => classifyDueItem(item, referenceDate.value) === dueFilter.value,
-  );
+  return dashboard.dueItems;
 });
 
 const focusHeadline = computed(() => {
-  if (dashboard.dueItems.length === 0) {
+  if (dueCounts.value.today_processing === 0) {
     return "오늘 처리할 소비기한 항목이 없습니다.";
   }
 
-  if (dueCounts.value.past > 0) {
-    return `지난 상품 ${dueCounts.value.past}개를 먼저 처리해야 합니다.`;
+  const pastCount = dashboard.dueItems.filter(
+    (item) => classifyDueItem(item, referenceDate.value) === "past",
+  ).length;
+  if (pastCount > 0) {
+    return `지난 상품 ${pastCount}개를 먼저 처리해야 합니다.`;
   }
 
-  if (dueCounts.value.today > 0) {
-    return `오늘 만료 상품 ${dueCounts.value.today}개가 바로 처리 대상입니다.`;
+  const todayCount = dashboard.dueItems.filter(
+    (item) => classifyDueItem(item, referenceDate.value) === "today",
+  ).length;
+  if (todayCount > 0) {
+    return `오늘 만료 상품 ${todayCount}개가 바로 처리 대상입니다.`;
   }
 
-  if (dueCounts.value.tomorrow > 0) {
-    return `내일 상품 ${dueCounts.value.tomorrow}개가 준비되어 있습니다.`;
+  const dairyTomorrowCount = dashboard.dueItems.filter(
+    (item) =>
+      classifyDueItem(item, referenceDate.value) === "tomorrow" &&
+      normalizeCategory(item.category) === DAIRY_CATEGORY,
+  ).length;
+  if (dairyTomorrowCount > 0) {
+    return `유제품 내일 상품 ${dairyTomorrowCount}개를 오늘 함께 처리합니다.`;
   }
 
-  if (dueCounts.value.future > 0) {
-    return `이후 상품 ${dueCounts.value.future}개까지 함께 조회 중입니다.`;
-  }
-
-  return `내일 상품 ${dueCounts.value.tomorrow}개가 준비되어 있습니다.`;
+  return `오늘 처리 대상 ${dueCounts.value.today_processing}개가 준비되어 있습니다.`;
 });
 
 function resetModal() {
   modal.open = false;
   modal.barcode = "";
   modal.expirationDate = "";
-  modal.category = "";
+  modal.category = DEFAULT_CATEGORY;
   modal.name = "";
   modal.lookupResult = null;
   modal.step = "barcode";
@@ -240,7 +268,7 @@ async function handleBarcodeLookup() {
     modal.lookupResult = data.product;
     modal.step = data.found ? "existing" : "new";
     if (data.found) {
-      modal.category = data.product.category ?? "";
+      modal.category = normalizeCategory(data.product.category);
     }
   } catch (error) {
     modal.error = error.message;
@@ -262,7 +290,7 @@ async function submitModal() {
       await createProduct({
         barcode: modal.barcode,
         name: modal.name,
-        category: modal.category || null,
+        category: modal.category,
         expiration_date: modal.expirationDate || null,
       });
     }
@@ -281,7 +309,7 @@ function ensureProductDraft(item) {
     productDrafts[item.id] = {
       name: item.name,
       barcode: item.barcode,
-      category: item.category ?? "",
+      category: normalizeCategory(item.category),
     };
   }
 
@@ -297,7 +325,7 @@ function openProductEdit(item, field) {
 
   draft.name = item.name;
   draft.barcode = item.barcode;
-  draft.category = item.category ?? "";
+  draft.category = normalizeCategory(item.category);
   expirationDrafts[item.id] = item.expiration_date ?? "";
   editTargetId.value = item.id;
   editField.value = field;
@@ -343,7 +371,7 @@ async function submitProductEdit(item) {
     }
 
     if (editField.value === "category") {
-      payload.category = draft.category || null;
+      payload.category = draft.category;
     }
 
     await updateProduct(item.id, payload);
@@ -354,8 +382,8 @@ async function submitProductEdit(item) {
 }
 
 async function clearCategoryEdit(item) {
-  ensureProductDraft(item).category = "";
-  await updateProduct(item.id, { category: null });
+  ensureProductDraft(item).category = DEFAULT_CATEGORY;
+  await updateProduct(item.id, { category: DEFAULT_CATEGORY });
   closeProductEdit();
   await loadDashboard();
 }
@@ -456,8 +484,8 @@ onMounted(() => {
 
           <section class="sidebar-metrics">
             <div class="metric-box">
-              <span>처리 대상</span>
-              <strong>{{ dashboard.dueItems.length }}</strong>
+              <span>오늘 처리</span>
+              <strong>{{ dueCounts.today_processing }}</strong>
             </div>
             <div class="metric-box soft">
               <span>미확인</span>
@@ -498,7 +526,9 @@ onMounted(() => {
                 <span class="mini-chip">미확인</span>
               </div>
 
-              <p class="meta-line">카테고리 {{ item.category || "미입력" }}</p>
+              <p class="meta-line">
+                카테고리 {{ normalizeCategory(item.category) }}
+              </p>
 
               <form
                 class="side-form"
@@ -582,7 +612,9 @@ onMounted(() => {
           <section class="main-panel">
             <div class="main-summary">
               <div>
-                <p class="section-label">처리 대상</p>
+                <p class="section-label">
+                  {{ dueFilter === "today_processing" ? "오늘 처리" : "전체" }}
+                </p>
                 <h2>{{ focusHeadline }}</h2>
               </div>
 
@@ -664,7 +696,7 @@ onMounted(() => {
                     >소비 {{ item.expiration_date }}</span
                   >
                   <span class="compact-category"
-                    >카테고리 {{ item.category || "미입력" }}</span
+                    >카테고리 {{ normalizeCategory(item.category) }}</span
                   >
                   <div class="compact-date-shell">
                     <div class="compact-date-summary">
@@ -772,11 +804,21 @@ onMounted(() => {
                   <span class="tray-label">{{
                     editFieldLabel(editField)
                   }}</span>
-                  <input
+                  <div
                     v-if="editField === 'expiration'"
-                    v-model="expirationDrafts[item.id]"
-                    type="date"
-                  />
+                    class="date-input-shell tray-date-shell"
+                  >
+                    <input
+                      v-model="expirationDrafts[item.id]"
+                      type="date"
+                    />
+                    <button
+                      class="date-shell-icon"
+                      type="button"
+                      aria-label="소비기한 수정 캘린더 열기"
+                      @click="openDatePicker"
+                    ></button>
+                  </div>
                   <input
                     v-else-if="editField === 'name'"
                     v-model="ensureProductDraft(item).name"
@@ -788,12 +830,18 @@ onMounted(() => {
                     type="text"
                     inputmode="numeric"
                   />
-                  <input
-                    v-else
+                  <select
+                    v-if="editField === 'category'"
                     v-model="ensureProductDraft(item).category"
-                    type="text"
-                    placeholder="카테고리 입력"
-                  />
+                  >
+                    <option
+                      v-for="option in CATEGORY_OPTIONS"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
                   <button class="ghost-button small" type="submit">저장</button>
                   <button
                     v-if="editField === 'expiration'"
@@ -812,7 +860,7 @@ onMounted(() => {
                     type="button"
                     @click="clearCategoryEdit(item)"
                   >
-                    비우기
+                    미선택
                   </button>
                   <button
                     class="ghost-button small subtle"
@@ -866,7 +914,7 @@ onMounted(() => {
                   <p class="mono">{{ item.barcode }}</p>
                   <h3>{{ item.name }}</h3>
                   <p class="meta-line">
-                    카테고리 {{ item.category || "미입력" }}
+                    카테고리 {{ normalizeCategory(item.category) }}
                   </p>
                 </div>
                 <button
@@ -965,11 +1013,17 @@ onMounted(() => {
 
               <label>
                 카테고리
-                <input
+                <select
                   v-model="modal.category"
-                  type="text"
-                  placeholder="선택 입력"
-                />
+                >
+                  <option
+                    v-for="option in CATEGORY_OPTIONS"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
               </label>
             </div>
 

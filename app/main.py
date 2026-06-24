@@ -22,6 +22,9 @@ from app.schemas import (
     ProductUpdate,
 )
 
+DEFAULT_CATEGORY = "미선택"
+ALLOWED_CATEGORIES = {DEFAULT_CATEGORY, "유제품"}
+
 
 def _map_product(row) -> ProductSummary:
     return ProductSummary.model_validate(dict(row))
@@ -84,6 +87,20 @@ def _normalized_optional_text(value: str | None) -> str | None:
     return normalized or None
 
 
+def _normalized_category(value: str | None) -> str:
+    normalized = _normalized_optional_text(value)
+    if normalized is None:
+        return DEFAULT_CATEGORY
+
+    if normalized not in ALLOWED_CATEGORIES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="category must be one of: 미선택, 유제품",
+        )
+
+    return normalized
+
+
 def _normalized_required_text(value: str, field_name: str) -> str:
     normalized = value.strip()
     if not normalized:
@@ -135,7 +152,7 @@ def create_product(
     response: Response,
 ) -> ProductMutationSummary:
     barcode = _normalized_required_text(payload.barcode, "barcode")
-    category = _normalized_optional_text(payload.category)
+    category = _normalized_category(payload.category)
 
     with get_connection() as connection:
         existing_product = _fetch_product_by_barcode(connection, barcode)
@@ -305,7 +322,7 @@ def update_product(
             updates["barcode"] = next_barcode
 
         if "category" in provided_fields:
-            updates["category"] = _normalized_optional_text(payload.category)
+            updates["category"] = _normalized_category(payload.category)
 
         if not updates:
             raise HTTPException(
