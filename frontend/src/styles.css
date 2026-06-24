@@ -434,7 +434,8 @@ h3 {
 .text-date-input,
 input[type="date"],
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   border: 1px solid #d9e2ec;
   border-radius: 12px;
@@ -668,14 +669,18 @@ input[type="date"]::-webkit-date-and-time-value {
 
 .compact-date-shell {
   min-width: 176px;
-  display: grid;
+  display: flex;
+  align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 .compact-date-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex: 1 1 0;
+  min-width: 150px;
   gap: 8px;
   min-height: 34px;
   padding: 6px 9px;
@@ -696,14 +701,19 @@ input[type="date"]::-webkit-date-and-time-value {
   font-family: "JetBrains Mono", "SFMono-Regular", monospace;
   font-size: 0.76rem;
   color: #344054;
+  white-space: nowrap;
 }
 
 .compact-date-toggle {
-  justify-self: end;
+  flex: 0 0 auto;
 }
 
 .compact-date-editor {
-  min-width: 0;
+  min-width: 100%;
+}
+
+.tray-date-shell {
+  flex: 1 1 220px;
 }
 
 .compact-rack .priority-chip {
@@ -800,6 +810,10 @@ input[type="date"]::-webkit-date-and-time-value {
 
 .rename-tray input {
   flex: 1 1 220px;
+}
+
+.rename-tray .date-input-shell input[type="date"] {
+  padding-right: 34px;
 }
 
 .tray-label {
