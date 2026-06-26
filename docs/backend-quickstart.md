@@ -79,11 +79,12 @@ GET /dashboard?reference_date=2026-06-14
 
 ### 폐기 처리 후 다음 상태 반영
 
+`discarded_date`는 요청 본문으로 받지 않고, 폐기 저장 시점의 날짜를 서버가 자동 기록한다.
+
 ```json
 POST /discards
 {
   "product_id": 1,
-  "discarded_date": "2026-06-14",
   "quantity": 2
 }
 ```
