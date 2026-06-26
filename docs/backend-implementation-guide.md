@@ -95,6 +95,7 @@
   - 대상 상품은 `active`여야 한다.
 
 - 처리:
+  - `discarded_date`는 요청값이 아니라 폐기 저장 시점의 오늘 날짜로 기록
   - `discard_histories`에 기록 추가
   - `expiration_states.expiration_date`를 `NULL`로 갱신
 
@@ -247,8 +248,11 @@
 입력:
 
 - `product_id`
-- `discarded_date`
 - `quantity`
+
+참고:
+
+- `discarded_date`는 API 입력값이 아니라 폐기 저장 시점의 오늘 날짜를 서버가 기록한다.
 
 ### `PATCH /products/{product_id}/archive`
 

@@ -96,7 +96,6 @@ const errorMessage = ref("");
 const editTargetId = ref(null);
 const editField = ref("");
 const moreMenuTargetId = ref(null);
-const discardDateEditTargetId = ref(null);
 
 const dashboard = reactive({
   dueItems: [],
@@ -389,17 +388,12 @@ async function clearCategoryEdit(item) {
 }
 
 async function submitDiscard(item) {
-  const draft = discardDrafts[item.id] ?? {
-    discarded_date: referenceDate.value,
-    quantity: 1,
-  };
+  const draft = discardDrafts[item.id] ?? { quantity: 1 };
 
   await createDiscard({
     product_id: item.id,
-    discarded_date: draft.discarded_date,
     quantity: Number(draft.quantity),
   });
-  discardDateEditTargetId.value = null;
   await loadDashboard();
 }
 
@@ -429,18 +423,10 @@ async function submitRestore(item) {
 
 function ensureDiscardDraft(itemId) {
   if (!discardDrafts[itemId]) {
-    discardDrafts[itemId] = {
-      discarded_date: referenceDate.value,
-      quantity: 1,
-    };
+    discardDrafts[itemId] = { quantity: 1 };
   }
 
   return discardDrafts[itemId];
-}
-
-function toggleDiscardDateEdit(itemId) {
-  discardDateEditTargetId.value =
-    discardDateEditTargetId.value === itemId ? null : itemId;
 }
 
 function ensureUncheckedDraft(itemId) {
@@ -698,37 +684,6 @@ onMounted(() => {
                   <span class="compact-category"
                     >카테고리 {{ normalizeCategory(item.category) }}</span
                   >
-                  <div class="compact-date-shell">
-                    <div class="compact-date-summary">
-                      <span class="compact-date-label">폐기처리일</span>
-                      <strong>{{
-                        ensureDiscardDraft(item.id).discarded_date
-                      }}</strong>
-                    </div>
-                    <button
-                      class="ghost-button small compact-date-toggle"
-                      type="button"
-                      @click="toggleDiscardDateEdit(item.id)"
-                    >
-                      변경
-                    </button>
-                    <div
-                      v-if="discardDateEditTargetId === item.id"
-                      class="date-input-shell compact-date-editor"
-                    >
-                      <input
-                        v-model="ensureDiscardDraft(item.id).discarded_date"
-                        class="compact-date"
-                        type="date"
-                      />
-                      <button
-                        class="date-shell-icon"
-                        type="button"
-                        aria-label="폐기처리일 캘린더 열기"
-                        @click="openDatePicker"
-                      ></button>
-                    </div>
-                  </div>
                   <input
                     v-model="ensureDiscardDraft(item.id).quantity"
                     class="compact-quantity"

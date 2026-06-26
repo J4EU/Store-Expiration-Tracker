@@ -42,7 +42,6 @@ class DashboardResponse(BaseModel):
 
 class DiscardCreate(BaseModel):
     product_id: int
-    discarded_date: date
     quantity: int = Field(gt=0)
 
 

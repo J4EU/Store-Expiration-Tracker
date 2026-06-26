@@ -403,6 +403,8 @@ def update_expiration(
     status_code=status.HTTP_201_CREATED,
 )
 def create_discard(payload: DiscardCreate) -> DiscardResponse:
+    discarded_date = date.today()
+
     with get_connection() as connection:
         product = _fetch_product(connection, payload.product_id)
 
@@ -425,7 +427,7 @@ def create_discard(payload: DiscardCreate) -> DiscardResponse:
             """,
             (
                 payload.product_id,
-                payload.discarded_date.isoformat(),
+                discarded_date.isoformat(),
                 payload.quantity,
             ),
         )
@@ -449,7 +451,7 @@ def create_discard(payload: DiscardCreate) -> DiscardResponse:
 
     return DiscardResponse(
         product=updated_product,
-        discarded_date=payload.discarded_date,
+        discarded_date=discarded_date,
         quantity=payload.quantity,
     )
 

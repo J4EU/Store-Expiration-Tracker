@@ -578,13 +578,12 @@ input[type="date"]::-webkit-date-and-time-value {
 .compact-rack {
   grid-template-columns:
     68px
-    minmax(128px, 1.2fr)
-    minmax(56px, auto)
+    minmax(112px, 1.1fr)
+    minmax(96px, auto)
     minmax(112px, auto)
-    minmax(108px, 0.9fr)
-    minmax(176px, 1fr)
-    58px
-    116px;
+    minmax(92px, 0.78fr)
+    56px
+    84px;
   align-items: center;
   column-gap: 10px;
   padding: 8px 10px;
@@ -614,6 +613,11 @@ input[type="date"]::-webkit-date-and-time-value {
 .compact-date,
 .compact-quantity {
   min-width: 0;
+}
+
+.compact-quantity {
+  width: 56px;
+  text-align: center;
 }
 
 .date-input-shell {
@@ -738,9 +742,10 @@ input[type="date"]::-webkit-date-and-time-value {
 
 .compact-submit {
   width: 100%;
-  min-height: 34px;
-  padding-inline: 10px;
-  font-size: 0.78rem;
+  min-height: 27px;
+  padding-inline: 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .field-shell {
@@ -759,7 +764,7 @@ input[type="date"]::-webkit-date-and-time-value {
 
 .rack-button {
   align-self: end;
-  min-height: 36px;
+  min-height: 27px;
 }
 
 .secondary-actions {
