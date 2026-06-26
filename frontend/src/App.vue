@@ -91,6 +91,7 @@ const dueFilter = ref("today_processing");
 const dashboardLoading = ref(false);
 const archiveLoading = ref(false);
 const savingModal = ref(false);
+const barcodeLookupLoading = ref(false);
 const archiveSearch = ref("");
 const errorMessage = ref("");
 const editTargetId = ref(null);
@@ -109,6 +110,8 @@ const discardDrafts = reactive({});
 const uncheckedDrafts = reactive({});
 const archiveSearchDraft = ref("");
 const barcodeInputRef = ref(null);
+const existingExpirationInputRef = ref(null);
+const newNameInputRef = ref(null);
 
 const modal = reactive({
   open: false,
@@ -260,6 +263,16 @@ async function loadArchivedProducts() {
 }
 
 async function handleBarcodeLookup() {
+  if (barcodeLookupLoading.value || modal.step !== "barcode") {
+    return;
+  }
+
+  if (!modal.barcode.trim()) {
+    modal.error = "바코드를 먼저 입력하세요.";
+    return;
+  }
+
+  barcodeLookupLoading.value = true;
   modal.error = "";
 
   try {
@@ -269,8 +282,17 @@ async function handleBarcodeLookup() {
     if (data.found) {
       modal.category = normalizeCategory(data.product.category);
     }
+
+    await nextTick();
+    if (data.found) {
+      existingExpirationInputRef.value?.focus();
+    } else {
+      newNameInputRef.value?.focus();
+    }
   } catch (error) {
     modal.error = error.message;
+  } finally {
+    barcodeLookupLoading.value = false;
   }
 }
 
@@ -918,13 +940,14 @@ onMounted(() => {
               type="text"
               inputmode="numeric"
               placeholder="바코드 입력"
+              @keydown.enter.prevent="handleBarcodeLookup"
             />
           </label>
 
           <div v-if="modal.step === 'barcode'" class="inline-row">
             <button
               class="primary-button"
-              :disabled="savingModal"
+              :disabled="savingModal || barcodeLookupLoading"
               @click="handleBarcodeLookup"
             >
               조회
@@ -943,7 +966,11 @@ onMounted(() => {
 
             <label>
               새 소비기한
-              <input v-model="modal.expirationDate" type="date" />
+              <input
+                ref="existingExpirationInputRef"
+                v-model="modal.expirationDate"
+                type="date"
+              />
             </label>
           </template>
 
@@ -960,6 +987,7 @@ onMounted(() => {
               <label>
                 상품명
                 <input
+                  ref="newNameInputRef"
                   v-model="modal.name"
                   type="text"
                   placeholder="신규 상품명 입력"

@@ -1,5 +1,32 @@
 const API_BASE_URL = "http://127.0.0.1:8000";
 
+function normalizeErrorDetail(detail) {
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+
+  if (Array.isArray(detail) && detail.length > 0) {
+    const firstItem = detail[0];
+    if (typeof firstItem === "string" && firstItem.trim()) {
+      return firstItem;
+    }
+
+    if (firstItem && typeof firstItem === "object") {
+      if (typeof firstItem.msg === "string" && firstItem.msg.trim()) {
+        return firstItem.msg;
+      }
+    }
+  }
+
+  if (detail && typeof detail === "object") {
+    if (typeof detail.msg === "string" && detail.msg.trim()) {
+      return detail.msg;
+    }
+  }
+
+  return "request failed";
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -14,7 +41,7 @@ async function request(path, options = {}) {
 
     try {
       const data = await response.json();
-      detail = data.detail ?? detail;
+      detail = normalizeErrorDetail(data.detail);
     } catch {
       detail = response.statusText || detail;
     }
