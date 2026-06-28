@@ -1,4 +1,4 @@
-# Frontend V1 Implementation
+# Frontend Implementation Guide
 
 ## 문서 목적
 
