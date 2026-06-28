@@ -92,6 +92,13 @@ export function createDiscard(payload) {
   });
 }
 
+export function createNoDiscard(payload) {
+  return request("/expiration-checks/no-discard", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function archiveProduct(productId) {
   return request(`/products/${productId}/archive`, {
     method: "PATCH",
