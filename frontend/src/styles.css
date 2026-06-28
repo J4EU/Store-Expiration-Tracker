@@ -256,6 +256,7 @@ h3 {
 .view-button,
 .ghost-button,
 .primary-button,
+.support-button,
 .warn-button,
 .tab-button {
   border: none;
@@ -272,6 +273,7 @@ h3 {
 
 .view-button,
 .ghost-button,
+.support-button,
 .tab-button {
   background: #f3f6fa;
   color: #344054;
@@ -290,9 +292,16 @@ h3 {
   border: 1px solid #ffd5d8;
 }
 
+.support-button {
+  background: #eef8ee;
+  color: #137333;
+  border: 1px solid #cfe8cf;
+}
+
 .view-button:hover,
 .ghost-button:hover,
 .primary-button:hover,
+.support-button:hover,
 .warn-button:hover,
 .tab-button:hover {
   transform: translateY(-1px);
@@ -583,6 +592,7 @@ input[type="date"]::-webkit-date-and-time-value {
     minmax(112px, auto)
     minmax(92px, 0.78fr)
     56px
+    84px
     84px;
   align-items: center;
   column-gap: 10px;
@@ -922,6 +932,10 @@ input[type="date"]::-webkit-date-and-time-value {
   padding: 16px;
 }
 
+.compact-modal-card {
+  width: min(540px, 100%);
+}
+
 .modal-progress {
   display: flex;
   gap: 6px;
@@ -956,6 +970,16 @@ input[type="date"]::-webkit-date-and-time-value {
 .lookup-title {
   margin-bottom: 4px;
   font-weight: 700;
+}
+
+.modal-helper-copy {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.modal-action-row {
+  justify-content: flex-start;
 }
 
 .empty-state {

@@ -15,6 +15,7 @@ from app.schemas import (
     DiscardResponse,
     ExpirationUpdate,
     HealthResponse,
+    NoDiscardCreate,
     ProductCreate,
     ProductLookupResponse,
     ProductMutationSummary,
@@ -454,6 +455,52 @@ def create_discard(payload: DiscardCreate) -> DiscardResponse:
         discarded_date=discarded_date,
         quantity=payload.quantity,
     )
+
+
+@app.post(
+    "/expiration-checks/no-discard",
+    response_model=ProductSummary,
+    status_code=status.HTTP_200_OK,
+)
+def create_no_discard(payload: NoDiscardCreate) -> ProductSummary:
+    with get_connection() as connection:
+        product = _fetch_product(connection, payload.product_id)
+
+        if product is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="product not found",
+            )
+
+        if product.status != "active":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="no-discard is allowed only for active products",
+            )
+
+        connection.execute(
+            """
+            UPDATE expiration_states
+            SET expiration_date = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE product_id = ?
+            """,
+            (
+                payload.expiration_date.isoformat()
+                if payload.expiration_date is not None
+                else None,
+                payload.product_id,
+            ),
+        )
+
+        updated_product = _fetch_product(connection, payload.product_id)
+
+    if updated_product is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="failed to update product state",
+        )
+
+    return updated_product
 
 
 @app.patch("/products/{product_id}/archive", response_model=ArchiveResponse)

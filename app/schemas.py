@@ -51,6 +51,11 @@ class DiscardResponse(BaseModel):
     quantity: int
 
 
+class NoDiscardCreate(BaseModel):
+    product_id: int
+    expiration_date: date | None = None
+
+
 class ExpirationUpdate(BaseModel):
     expiration_date: date | None = None
 

@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import {
   archiveProduct,
   createDiscard,
+  createNoDiscard,
   createProduct,
   fetchArchivedProducts,
   fetchDashboard,
@@ -111,6 +112,7 @@ const uncheckedDrafts = reactive({});
 const archiveSearchDraft = ref("");
 const barcodeInputRef = ref(null);
 const existingExpirationInputRef = ref(null);
+const noDiscardExpirationInputRef = ref(null);
 const newNameInputRef = ref(null);
 
 const modal = reactive({
@@ -122,6 +124,17 @@ const modal = reactive({
   lookupResult: null,
   step: "barcode",
   error: "",
+});
+
+const noDiscardModal = reactive({
+  open: false,
+  productId: null,
+  productName: "",
+  barcode: "",
+  currentExpirationDate: "",
+  expirationDate: "",
+  error: "",
+  saving: false,
 });
 
 const dueTabs = [
@@ -200,12 +213,36 @@ function resetModal() {
   modal.error = "";
 }
 
+function resetNoDiscardModal() {
+  noDiscardModal.open = false;
+  noDiscardModal.productId = null;
+  noDiscardModal.productName = "";
+  noDiscardModal.barcode = "";
+  noDiscardModal.currentExpirationDate = "";
+  noDiscardModal.expirationDate = "";
+  noDiscardModal.error = "";
+  noDiscardModal.saving = false;
+}
+
 function openModal() {
   modal.open = true;
   modal.step = "barcode";
   modal.error = "";
   nextTick(() => {
     barcodeInputRef.value?.focus();
+  });
+}
+
+function openNoDiscardModal(item) {
+  noDiscardModal.open = true;
+  noDiscardModal.productId = item.id;
+  noDiscardModal.productName = item.name;
+  noDiscardModal.barcode = item.barcode;
+  noDiscardModal.currentExpirationDate = item.expiration_date ?? "";
+  noDiscardModal.expirationDate = "";
+  noDiscardModal.error = "";
+  nextTick(() => {
+    noDiscardExpirationInputRef.value?.focus();
   });
 }
 
@@ -417,6 +454,38 @@ async function submitDiscard(item) {
     quantity: Number(draft.quantity),
   });
   await loadDashboard();
+}
+
+async function submitNoDiscard(saveExpiration) {
+  if (!noDiscardModal.productId || noDiscardModal.saving) {
+    return;
+  }
+
+  if (saveExpiration && !noDiscardModal.expirationDate) {
+    noDiscardModal.error = "다음 소비기한을 입력하거나 나중에 확인을 선택하세요.";
+    return;
+  }
+
+  noDiscardModal.saving = true;
+  noDiscardModal.error = "";
+
+  try {
+    const payload = {
+      product_id: noDiscardModal.productId,
+    };
+
+    if (saveExpiration) {
+      payload.expiration_date = noDiscardModal.expirationDate;
+    }
+
+    await createNoDiscard(payload);
+    resetNoDiscardModal();
+    await loadDashboard();
+  } catch (error) {
+    noDiscardModal.error = error.message;
+  } finally {
+    noDiscardModal.saving = false;
+  }
 }
 
 async function submitUncheckedExpiration(item) {
@@ -718,6 +787,13 @@ onMounted(() => {
                   >
                     폐기 완료
                   </button>
+                  <button
+                    class="support-button rack-button compact-submit"
+                    type="button"
+                    @click="openNoDiscardModal(item)"
+                  >
+                    폐기 없음
+                  </button>
                 </form>
 
                 <div class="secondary-actions">
@@ -966,11 +1042,19 @@ onMounted(() => {
 
             <label>
               새 소비기한
-              <input
-                ref="existingExpirationInputRef"
-                v-model="modal.expirationDate"
-                type="date"
-              />
+              <div class="date-input-shell modal-date-shell">
+                <input
+                  ref="existingExpirationInputRef"
+                  v-model="modal.expirationDate"
+                  type="date"
+                />
+                <button
+                  class="date-shell-icon"
+                  type="button"
+                  aria-label="새 소비기한 캘린더 열기"
+                  @click="openDatePicker"
+                ></button>
+              </div>
             </label>
           </template>
 
@@ -1010,10 +1094,18 @@ onMounted(() => {
               </label>
             </div>
 
-            <label>
-              소비기한
-              <input v-model="modal.expirationDate" type="date" />
-            </label>
+              <label>
+                소비기한
+                <div class="date-input-shell modal-date-shell">
+                  <input v-model="modal.expirationDate" type="date" />
+                  <button
+                    class="date-shell-icon"
+                    type="button"
+                    aria-label="소비기한 캘린더 열기"
+                    @click="openDatePicker"
+                  ></button>
+                </div>
+              </label>
           </template>
 
           <p v-if="modal.error" class="error-text">{{ modal.error }}</p>
@@ -1025,6 +1117,77 @@ onMounted(() => {
               @click="submitModal"
             >
               {{ modal.step === "existing" ? "소비기한 반영" : "신규 등록" }}
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div
+      v-if="noDiscardModal.open"
+      class="modal-backdrop"
+      @click.self="resetNoDiscardModal"
+    >
+      <section class="modal-card compact-modal-card">
+        <div class="modal-top">
+          <div>
+            <p class="section-label">폐기 없음</p>
+            <h2>다음 소비기한을 지금 반영할까요?</h2>
+          </div>
+          <button class="ghost-button small" @click="resetNoDiscardModal">
+            닫기
+          </button>
+        </div>
+
+        <div class="modal-stack">
+          <div class="lookup-box success">
+            <p class="lookup-title">{{ noDiscardModal.productName }}</p>
+            <p class="meta-line">
+              {{ noDiscardModal.barcode }} / 현재 소비기한
+              {{ noDiscardModal.currentExpirationDate || "미확인" }}
+            </p>
+          </div>
+
+          <p class="modal-helper-copy">
+            다음 소비기한을 지금 입력하면 바로 저장합니다. 아직 확인하지
+            못했다면 나중에 확인을 눌러 미확인 목록으로 보낼 수 있습니다.
+          </p>
+
+          <label>
+            다음 소비기한
+            <div class="date-input-shell modal-date-shell">
+              <input
+                ref="noDiscardExpirationInputRef"
+                v-model="noDiscardModal.expirationDate"
+                type="date"
+              />
+              <button
+                class="date-shell-icon"
+                type="button"
+                aria-label="다음 소비기한 캘린더 열기"
+                @click="openDatePicker"
+              ></button>
+            </div>
+          </label>
+
+          <p v-if="noDiscardModal.error" class="error-text">
+            {{ noDiscardModal.error }}
+          </p>
+
+          <div class="inline-row modal-action-row">
+            <button
+              class="primary-button"
+              :disabled="noDiscardModal.saving"
+              @click="submitNoDiscard(true)"
+            >
+              다음 소비기한 저장
+            </button>
+            <button
+              class="support-button"
+              :disabled="noDiscardModal.saving"
+              @click="submitNoDiscard(false)"
+            >
+              나중에 확인
             </button>
           </div>
         </div>
