@@ -102,6 +102,21 @@
 - 결과:
   - 폐기 직후 상품은 `미확인` 사이드바 대상으로 이동한다.
 
+### 폐기 없음 처리
+
+- 전제:
+  - 대상 상품은 `active`여야 한다.
+
+- 처리:
+  - 폐기 이력은 저장하지 않는다.
+  - 다음 소비기한을 함께 받으면 `expiration_states.expiration_date`를 새 값으로 갱신한다.
+  - 다음 소비기한을 아직 입력하지 않으면 `expiration_states.expiration_date`를 `NULL`로 갱신한다.
+
+- 결과:
+  - 새 소비기한을 입력한 경우 상품은 계속 메인 처리 대상 또는 일반 조회 흐름에 남는다.
+  - 지금 입력하지 않은 경우 현재 소비기한만 종료되고, 상품은 `미확인` 사이드바 대상으로 이동한다.
+  - 이때 상품 row 자체는 유지되며, `expiration_date = NULL`은 다시 확인이 필요한 정상 관리 상태로 해석한다.
+
 ### 아카이빙
 
 - `active`
@@ -253,6 +268,24 @@
 참고:
 
 - `discarded_date`는 API 입력값이 아니라 폐기 저장 시점의 오늘 날짜를 서버가 기록한다.
+- 이 API는 실제 폐기 수량이 있는 경우만 담당한다.
+
+### `POST /expiration-checks/no-discard`
+
+역할:
+
+- 현재 소비기한 종료 후 다음 상태 반영
+
+입력:
+
+- `product_id`
+- `expiration_date` optional
+
+참고:
+
+- 이 API는 폐기 이력을 저장하지 않는다.
+- `expiration_date`가 오면 새 소비기한으로 바로 갱신한다.
+- `expiration_date`가 없으면 현재 소비기한을 종료하고 `NULL`로 전환한다.
 
 ### `PATCH /products/{product_id}/archive`
 
