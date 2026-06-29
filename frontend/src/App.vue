@@ -114,6 +114,7 @@ const barcodeInputRef = ref(null);
 const existingExpirationInputRef = ref(null);
 const noDiscardExpirationInputRef = ref(null);
 const newNameInputRef = ref(null);
+const archiveSearchInputRef = ref(null);
 
 const modal = reactive({
   open: false,
@@ -297,6 +298,13 @@ async function loadArchivedProducts() {
   } finally {
     archiveLoading.value = false;
   }
+}
+
+async function openArchiveView() {
+  currentView.value = "archive";
+  await nextTick();
+  archiveSearchInputRef.value?.focus();
+  loadArchivedProducts();
 }
 
 async function handleBarcodeLookup() {
@@ -611,7 +619,7 @@ onMounted(() => {
                 class="side-form"
                 @submit.prevent="submitUncheckedExpiration(item)"
               >
-                <div class="date-input-shell side-date-shell">
+                <div class="date-input-shell side-date-shell" @click="openDatePicker">
                   <input
                     v-model="ensureUncheckedDraft(item.id).expiration_date"
                     type="date"
@@ -620,7 +628,7 @@ onMounted(() => {
                     class="date-shell-icon"
                     type="button"
                     aria-label="소비기한 캘린더 열기"
-                    @click="openDatePicker"
+                    @click.stop="openDatePicker"
                   ></button>
                 </div>
                 <div class="inline-row">
@@ -673,10 +681,7 @@ onMounted(() => {
             </button>
             <button
               :class="['nav-button', { active: currentView === 'archive' }]"
-              @click="
-                currentView = 'archive';
-                loadArchivedProducts();
-              "
+              @click="openArchiveView"
             >
               아카이브 조회
             </button>
@@ -698,7 +703,7 @@ onMounted(() => {
               <div class="date-console">
                 <span class="date-console-label">기준일</span>
 
-                <div class="date-input-shell summary-date-shell">
+                <div class="date-input-shell summary-date-shell" @click="openDatePicker">
                   <input
                     v-model="referenceDate"
                     class="text-date-input"
@@ -708,7 +713,7 @@ onMounted(() => {
                     class="date-shell-icon"
                     type="button"
                     aria-label="기준일 캘린더 열기"
-                    @click="openDatePicker"
+                    @click.stop="openDatePicker"
                   ></button>
                 </div>
 
@@ -860,6 +865,7 @@ onMounted(() => {
                   <div
                     v-if="editField === 'expiration'"
                     class="date-input-shell tray-date-shell"
+                    @click="openDatePicker"
                   >
                     <input
                       v-model="expirationDrafts[item.id]"
@@ -869,7 +875,7 @@ onMounted(() => {
                       class="date-shell-icon"
                       type="button"
                       aria-label="소비기한 수정 캘린더 열기"
-                      @click="openDatePicker"
+                      @click.stop="openDatePicker"
                     ></button>
                   </div>
                   <input
@@ -944,6 +950,7 @@ onMounted(() => {
                 "
               >
                 <input
+                  ref="archiveSearchInputRef"
                   v-model="archiveSearchDraft"
                   type="text"
                   placeholder="바코드, 상품명, 카테고리 검색"
@@ -1042,7 +1049,7 @@ onMounted(() => {
 
             <label>
               새 소비기한
-              <div class="date-input-shell modal-date-shell">
+              <div class="date-input-shell modal-date-shell" @click="openDatePicker">
                 <input
                   ref="existingExpirationInputRef"
                   v-model="modal.expirationDate"
@@ -1052,7 +1059,7 @@ onMounted(() => {
                   class="date-shell-icon"
                   type="button"
                   aria-label="새 소비기한 캘린더 열기"
-                  @click="openDatePicker"
+                  @click.stop="openDatePicker"
                 ></button>
               </div>
             </label>
@@ -1096,13 +1103,13 @@ onMounted(() => {
 
               <label>
                 소비기한
-                <div class="date-input-shell modal-date-shell">
+                <div class="date-input-shell modal-date-shell" @click="openDatePicker">
                   <input v-model="modal.expirationDate" type="date" />
                   <button
                     class="date-shell-icon"
                     type="button"
                     aria-label="소비기한 캘린더 열기"
-                    @click="openDatePicker"
+                    @click.stop="openDatePicker"
                   ></button>
                 </div>
               </label>
@@ -1155,7 +1162,7 @@ onMounted(() => {
 
           <label>
             다음 소비기한
-            <div class="date-input-shell modal-date-shell">
+            <div class="date-input-shell modal-date-shell" @click="openDatePicker">
               <input
                 ref="noDiscardExpirationInputRef"
                 v-model="noDiscardModal.expirationDate"
@@ -1165,7 +1172,7 @@ onMounted(() => {
                 class="date-shell-icon"
                 type="button"
                 aria-label="다음 소비기한 캘린더 열기"
-                @click="openDatePicker"
+                @click.stop="openDatePicker"
               ></button>
             </div>
           </label>

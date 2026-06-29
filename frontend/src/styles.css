@@ -49,7 +49,7 @@ button {
 .app-shell {
   width: min(1360px, calc(100% - 24px));
   margin: 0 auto;
-  padding: 14px 0 24px;
+  padding: 22px 0 24px;
 }
 
 .app-frame {
@@ -115,8 +115,8 @@ h3 {
 
 .workspace-sidebar {
   position: sticky;
-  top: 14px;
-  min-height: calc(100vh - 28px);
+  top: 22px;
+  min-height: calc(100vh - 44px);
   border-radius: 18px;
   padding: 14px;
   display: flex;
@@ -370,6 +370,10 @@ h3 {
   gap: 18px;
 }
 
+.archive-header > div:first-child {
+  flex: 0 1 360px;
+}
+
 .main-summary {
   margin-bottom: 12px;
 }
@@ -396,6 +400,28 @@ h3 {
   font-size: 0.86rem;
   letter-spacing: -0.03em;
   font-family: "JetBrains Mono", "SFMono-Regular", monospace;
+}
+
+.date-tools .ghost-button {
+  background: #ffffff;
+  border: 1px solid #dbe4ee;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.date-tools .ghost-button:hover {
+  background: #f6fff3;
+  border-color: rgba(8, 179, 0, 0.35);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.06),
+    0 6px 14px rgba(10, 204, 0, 0.08);
+}
+
+.date-tools .ghost-button:focus-visible {
+  outline: none;
+  border-color: var(--green-strong);
+  box-shadow:
+    0 0 0 3px var(--green-wash),
+    0 2px 4px rgba(15, 23, 42, 0.06);
 }
 
 .filter-strip {
@@ -426,18 +452,39 @@ h3 {
 }
 
 .search-row {
+  flex: 0 1 280px;
+  justify-content: flex-end;
   flex-wrap: nowrap;
   align-items: center;
 }
 
 .search-row input[type="text"] {
-  flex: 1 1 320px;
+  flex: 1 1 440px;
   min-width: 0;
 }
 
 .search-row .ghost-button {
   flex: 0 0 auto;
   white-space: nowrap;
+  background: #ffffff;
+  border: 1px solid #dbe4ee;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.search-row .ghost-button:hover {
+  background: #f6fff3;
+  border-color: rgba(8, 179, 0, 0.35);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.06),
+    0 6px 14px rgba(10, 204, 0, 0.08);
+}
+
+.search-row .ghost-button:focus-visible {
+  outline: none;
+  border-color: var(--green-strong);
+  box-shadow:
+    0 0 0 3px var(--green-wash),
+    0 2px 4px rgba(15, 23, 42, 0.06);
 }
 
 .text-date-input,
@@ -486,6 +533,7 @@ input[type="date"]::-webkit-date-and-time-value {
 .archive-card,
 .lookup-box {
   border-radius: 16px;
+  padding: 12px 16px;
   background: var(--panel-strong);
   border: 1px solid #eef2f6;
 }
@@ -633,52 +681,94 @@ input[type="date"]::-webkit-date-and-time-value {
 .date-input-shell {
   position: relative;
   min-width: 0;
+  cursor: pointer;
 }
 
 .date-input-shell input[type="date"] {
-  padding-right: 34px;
+  padding-right: 48px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.date-input-shell:hover input[type="date"] {
+  border-color: var(--green);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fdf7 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 8px 20px rgba(10, 204, 0, 0.08);
+}
+
+.date-input-shell:focus-within input[type="date"] {
+  border-color: var(--green-strong);
+  background: linear-gradient(180deg, #ffffff 0%, #f4fbf2 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 0 3px var(--green-wash),
+    0 10px 22px rgba(10, 204, 0, 0.1);
 }
 
 .date-shell-icon {
   position: absolute;
   top: 50%;
-  right: 10px;
-  width: 14px;
-  height: 14px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
   transform: translateY(-50%);
   padding: 0;
-  border: 1.4px solid #64748b;
-  border-radius: 4px;
-  background: transparent;
+  border: 1.5px solid rgba(8, 179, 0, 0.5);
+  border-radius: 5px;
+  background: rgba(248, 253, 247, 0.96);
   cursor: pointer;
-  opacity: 0.78;
+  opacity: 0.92;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    opacity 140ms ease;
+}
+
+.date-input-shell:hover .date-shell-icon,
+.date-input-shell:focus-within .date-shell-icon {
+  border-color: var(--green-strong);
+  background: #ffffff;
+  opacity: 1;
+  transform: translateY(-50%) scale(1.04);
+  box-shadow: 0 4px 10px rgba(10, 204, 0, 0.12);
 }
 
 .date-shell-icon::before,
 .date-shell-icon::after {
   content: "";
   position: absolute;
-  left: 2px;
-  right: 2px;
+  left: 3px;
+  right: 3px;
 }
 
 .date-shell-icon::before {
-  top: 3px;
-  border-top: 1.4px solid #64748b;
+  top: 5px;
+  border-top: 1.5px solid var(--green-strong);
 }
 
 .date-shell-icon::after {
-  top: -3px;
-  height: 4px;
-  left: 2px;
-  right: 2px;
-  border-top: 2px solid #64748b;
+  top: -4px;
+  height: 5px;
+  left: 3px;
+  right: 3px;
+  border-top: 2px solid var(--green-strong);
 }
 
 .summary-date-shell {
   min-width: 180px;
+}
+
+.summary-date-shell input[type="date"] {
+  padding-top: 7px;
+  padding-bottom: 7px;
 }
 
 .compact-date-shell {
