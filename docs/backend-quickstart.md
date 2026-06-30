@@ -44,6 +44,7 @@ Vue 개발 서버 기본 주소는 [http://127.0.0.1:5173](http://127.0.0.1:5173
 - `PATCH /products/{product_id}`
 - `PATCH /products/{product_id}/expiration`
 - `POST /discards`
+- `POST /expiration-checks/no-discard`
 - `PATCH /products/{product_id}/archive`
 - `PATCH /products/{product_id}/restore`
 - `GET /archived-products`
@@ -60,10 +61,12 @@ POST /products
 {
   "barcode": "8801234567890",
   "name": "삼각김밥",
-  "category": "푸드",
+  "category": "미선택",
   "expiration_date": "2026-06-15"
 }
 ```
+
+현재 카테고리 입력값은 `미선택` 또는 `유제품`만 허용한다.
 
 ### 바코드 조회
 
