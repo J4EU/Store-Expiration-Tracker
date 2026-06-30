@@ -203,8 +203,7 @@ const focusHeadline = computed(() => {
   return `오늘 처리 대상 ${dueCounts.value.today_processing}개가 준비되어 있습니다.`;
 });
 
-function resetModal() {
-  modal.open = false;
+function resetModalFields() {
   modal.barcode = "";
   modal.expirationDate = "";
   modal.category = DEFAULT_CATEGORY;
@@ -212,6 +211,11 @@ function resetModal() {
   modal.lookupResult = null;
   modal.step = "barcode";
   modal.error = "";
+}
+
+function resetModal() {
+  modal.open = false;
+  resetModalFields();
 }
 
 function resetNoDiscardModal() {
@@ -227,8 +231,7 @@ function resetNoDiscardModal() {
 
 function openModal() {
   modal.open = true;
-  modal.step = "barcode";
-  modal.error = "";
+  resetModalFields();
   nextTick(() => {
     barcodeInputRef.value?.focus();
   });
@@ -361,8 +364,10 @@ async function submitModal() {
       });
     }
 
-    resetModal();
     await loadDashboard();
+    resetModalFields();
+    await nextTick();
+    barcodeInputRef.value?.focus();
   } catch (error) {
     modal.error = error.message;
   } finally {
