@@ -2,7 +2,7 @@
 
 편의점에서 상품별 소비기한 상태를 끊기지 않게 추적하기 위한 프로젝트입니다.
 
-이 저장소는 문제 정의, MVP 설계, 그리고 실제 로컬 검증용 구현을 함께 다룹니다. 목표는 전체 재고 관리 시스템을 만드는 것이 아니라, 한 번 등록한 상품이 소비기한 값이 있든 없든 추적 대상에서 사라지지 않도록 하는 것입니다.
+이 저장소는 문제 정의, 초기 MVP 설계, 이후 방향 조정 기록, 그리고 실제 로컬 검증용 구현을 함께 다룹니다. 출발점은 편의점 현장에서 상품별 소비기한 상태를 끊기지 않게 관리할 방법을 찾는 것이었습니다.
 
 ## 왜 필요한가
 
@@ -10,7 +10,9 @@
 
 특히 다음에 등록할 소비기한이 없는 상태에서 품목을 삭제하면, 소비기한 정보뿐 아니라 그 상품이 다시 확인이 필요한 대상이라는 사실도 함께 사라집니다. 그 결과 근무자는 "내가 어떤 상품을 지웠지?", "어떤 상품을 다시 확인해야 하지?"를 기억에 의존하게 됩니다. 이 프로젝트는 그 인지 소모를 줄이기 위한 도구를 만드는 데 초점을 둡니다.
 
-핵심은 단순히 소비기한 날짜를 저장하는 것이 아니라, 어떤 상품이 지금 `확인됨` 상태인지 `미확인` 상태인지가 시스템에 계속 남아 있도록 만드는 것입니다.
+핵심은 단순히 소비기한 날짜를 저장하는 것이 아니라, 한 번 관리 대상으로 올린 상품이 지금 `확인됨` 상태인지 `미확인` 상태인지가 시스템에 계속 남아 있도록 만드는 것입니다.
+
+초기 가정에서 출발해 실제 등록 작업 후 방향을 어떻게 조정했는지는 [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md), [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md), [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)에서 나눠 정리합니다.
 
 ## 현재 범위
 
@@ -72,9 +74,10 @@
 
 1. [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md)
 2. [문제 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/problem.md)
-3. [MVP](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp.md)
-4. [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)
-5. [MVP Implementation Outline](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-implementation-outline.md)
+3. [초기 MVP](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp.md)
+4. [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md)
+5. [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)
+6. [MVP Implementation Outline](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-implementation-outline.md)
 
 ### 구현 문서
 
