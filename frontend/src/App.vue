@@ -218,6 +218,19 @@ function resetModal() {
   resetModalFields();
 }
 
+function returnToBarcodeStep() {
+  modal.expirationDate = "";
+  modal.category = DEFAULT_CATEGORY;
+  modal.name = "";
+  modal.lookupResult = null;
+  modal.step = "barcode";
+  modal.error = "";
+  modal.barcode = "";
+  nextTick(() => {
+    barcodeInputRef.value?.focus();
+  });
+}
+
 function resetNoDiscardModal() {
   noDiscardModal.open = false;
   noDiscardModal.productId = null;
@@ -1123,6 +1136,13 @@ onMounted(() => {
           <p v-if="modal.error" class="error-text">{{ modal.error }}</p>
 
           <div v-if="modal.step !== 'barcode'" class="inline-row">
+            <button
+              class="ghost-button"
+              :disabled="savingModal"
+              @click="returnToBarcodeStep"
+            >
+              이전으로
+            </button>
             <button
               class="primary-button"
               :disabled="savingModal"
