@@ -66,24 +66,48 @@ function isTodayProcessingItem(item, referenceDate) {
   return type === "tomorrow" && normalizeCategory(item.category) === DAIRY_CATEGORY;
 }
 
-function statusLabel(type) {
+function displayPriority(item, referenceDate) {
+  const type = classifyDueItem(item, referenceDate);
+
+  if (type === "tomorrow" && normalizeCategory(item.category) === DAIRY_CATEGORY) {
+    return {
+      tone: "today",
+      label: "오늘 처리",
+    };
+  }
+
   if (type === "past") {
-    return "지난 상품";
+    return {
+      tone: "past",
+      label: "지난 상품",
+    };
   }
 
   if (type === "today") {
-    return "오늘 만료";
+    return {
+      tone: "today",
+      label: "오늘 처리",
+    };
   }
 
   if (type === "tomorrow") {
-    return "내일 상품";
+    return {
+      tone: "tomorrow",
+      label: "내일 상품",
+    };
   }
 
   if (type === "future") {
-    return "이후 상품";
+    return {
+      tone: "future",
+      label: "이후 상품",
+    };
   }
 
-  return "미확인";
+  return {
+    tone: "unchecked",
+    label: "미확인",
+  };
 }
 
 const referenceDate = ref(formatLocalDate(new Date()));
@@ -185,19 +209,10 @@ const focusHeadline = computed(() => {
   }
 
   const todayCount = dashboard.dueItems.filter(
-    (item) => classifyDueItem(item, referenceDate.value) === "today",
+    (item) => isTodayProcessingItem(item, referenceDate.value),
   ).length;
   if (todayCount > 0) {
-    return `오늘 만료 상품 ${todayCount}개가 바로 처리 대상입니다.`;
-  }
-
-  const dairyTomorrowCount = dashboard.dueItems.filter(
-    (item) =>
-      classifyDueItem(item, referenceDate.value) === "tomorrow" &&
-      normalizeCategory(item.category) === DAIRY_CATEGORY,
-  ).length;
-  if (dairyTomorrowCount > 0) {
-    return `유제품 내일 상품 ${dairyTomorrowCount}개를 오늘 함께 처리합니다.`;
+    return `오늘 확인할 상품 ${todayCount}개가 있습니다.`;
   }
 
   return `오늘 처리 대상 ${dueCounts.value.today_processing}개가 준비되어 있습니다.`;
@@ -785,10 +800,10 @@ onMounted(() => {
                   <span
                     :class="[
                       'priority-chip',
-                      classifyDueItem(item, referenceDate),
+                      displayPriority(item, referenceDate).tone,
                     ]"
                   >
-                    {{ statusLabel(classifyDueItem(item, referenceDate)) }}
+                    {{ displayPriority(item, referenceDate).label }}
                   </span>
                   <strong class="compact-name">{{ item.name }}</strong>
                   <span class="mono compact-barcode">{{ item.barcode }}</span>
