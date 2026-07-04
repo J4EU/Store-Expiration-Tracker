@@ -1134,6 +1134,38 @@ input[type="date"]::-webkit-date-and-time-value {
   flex: 0 0 auto;
 }
 
+.success-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #137333;
+  border: 2px solid #15b407;
+  box-shadow:
+    0 16px 32px rgba(10, 110, 4, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 @media (max-width: 1180px) {
   body {
     overflow: auto;
@@ -1210,5 +1242,10 @@ input[type="date"]::-webkit-date-and-time-value {
 
   .field-shell.slim {
     max-width: none;
+  }
+
+  .success-toast {
+    right: 12px;
+    bottom: 12px;
   }
 }

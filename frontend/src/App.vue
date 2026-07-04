@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 
 import {
   archiveProduct,
@@ -139,6 +139,11 @@ const existingExpirationInputRef = ref(null);
 const noDiscardExpirationInputRef = ref(null);
 const newNameInputRef = ref(null);
 const archiveSearchInputRef = ref(null);
+const successToast = reactive({
+  visible: false,
+  message: "",
+});
+let successToastTimerId = null;
 
 const modal = reactive({
   open: false,
@@ -255,6 +260,20 @@ function resetNoDiscardModal() {
   noDiscardModal.expirationDate = "";
   noDiscardModal.error = "";
   noDiscardModal.saving = false;
+}
+
+function showSuccessToast(message) {
+  successToast.message = message;
+  successToast.visible = true;
+
+  if (successToastTimerId) {
+    window.clearTimeout(successToastTimerId);
+  }
+
+  successToastTimerId = window.setTimeout(() => {
+    successToast.visible = false;
+    successToastTimerId = null;
+  }, 2200);
 }
 
 function openModal() {
@@ -377,10 +396,13 @@ async function submitModal() {
   modal.error = "";
 
   try {
+    let successMessage = "등록이 반영되었습니다.";
+
     if (modal.step === "existing" && modal.lookupResult) {
       await updateExpiration(modal.lookupResult.id, {
         expiration_date: modal.expirationDate || null,
       });
+      successMessage = `${modal.lookupResult.name} 소비기한을 반영했습니다.`;
     }
 
     if (modal.step === "new") {
@@ -390,12 +412,14 @@ async function submitModal() {
         category: modal.category,
         expiration_date: modal.expirationDate || null,
       });
+      successMessage = `${modal.name} 상품을 등록했습니다.`;
     }
 
     await loadDashboard();
     resetModalFields();
     await nextTick();
     barcodeInputRef.value?.focus();
+    showSuccessToast(successMessage);
   } catch (error) {
     modal.error = error.message;
   } finally {
@@ -571,6 +595,12 @@ function ensureUncheckedDraft(itemId) {
 
 onMounted(() => {
   loadDashboard();
+});
+
+onBeforeUnmount(() => {
+  if (successToastTimerId) {
+    window.clearTimeout(successToastTimerId);
+  }
 });
 </script>
 
@@ -1240,5 +1270,11 @@ onMounted(() => {
         </div>
       </section>
     </div>
+
+    <transition name="toast-fade">
+      <div v-if="successToast.visible" class="success-toast" role="status" aria-live="polite">
+        {{ successToast.message }}
+      </div>
+    </transition>
   </div>
 </template>
