@@ -2,7 +2,58 @@
 
 편의점에서 상품별 소비기한 상태를 끊기지 않게 추적하기 위한 프로젝트입니다.
 
-이 저장소는 문제 정의, 초기 MVP 설계, 이후 방향 조정 기록, 그리고 실제 로컬 검증용 구현을 함께 다룹니다. 출발점은 편의점 현장에서 상품별 소비기한 상태를 끊기지 않게 관리할 방법을 찾는 것이었습니다.
+이 저장소는 실제 현장에서 겪은 소비기한 관리 문제를 바탕으로, 로컬에서 바로 검증 가능한 추적 도구를 만든 과정을 다룹니다. 현재는 FastAPI 백엔드와 Vue 프론트엔드로 MVP를 구현해 두었고, 다음 단계로 배포 가능한 형태로 다듬고 있습니다.
+
+## 지금 할 수 있는 것
+
+- 바코드 기준으로 상품을 조회하고, 없을 때만 신규 등록
+- 상품별 현재 소비기한 상태 추적
+- `expiration_date = NULL`도 정상적인 `미확인` 상태로 유지
+- `오늘 처리`와 `미확인` 흐름을 같은 운영 화면에서 관리
+- `폐기 완료`와 `폐기 없음`을 구분해 다음 상태 반영
+- 상품 아카이빙과 복구
+- 폐기 이력 누적 저장
+
+## 대표 흐름
+
+현재 MVP를 가장 잘 설명하는 기본 흐름은 아래와 같습니다.
+
+1. `등록 시작`
+2. `바코드 조회`
+3. 기존 상품이면 소비기한만 반영하고, 없으면 신규 등록
+4. 메인 화면에서 `오늘 처리` 대상과 `미확인` 대상을 함께 관리
+5. 필요 시 `폐기 완료`, `폐기 없음`, `아카이브` 처리
+
+현재 운영 화면의 핵심 구조는 `좌측 사이드 패널 + 메인 영역` 입니다.
+
+- 좌측 사이드 패널: 등록 시작 버튼, `오늘 처리 / 미확인` 수량, 미확인 목록
+- 메인 영역: `오늘 처리 / 전체` 필터, 처리 대상 리스트, 아카이브 조회 전환
+
+## 빠른 실행
+
+### 백엔드
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+- API 문서: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- DB 파일: `data/store_expiration_tracker.db`
+
+### 프론트엔드
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- 개발 서버: [http://127.0.0.1:5173](http://127.0.0.1:5173)
+
+처음 확인할 때는 `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 순서로 보면 됩니다.
 
 ## 왜 필요한가
 
@@ -38,33 +89,11 @@
 
 현재는 Vue 기반 프론트엔드와 FastAPI 백엔드로 로컬 검증 가능한 MVP를 구현해 둔 상태입니다.
 
-현재 운영 화면의 핵심 구조는 `좌측 사이드 패널 + 메인 영역` 입니다.
+- 프론트엔드 소스: `frontend/`
+- 백엔드 소스: `app/`
+- 현재 로컬 DB: `data/store_expiration_tracker.db`
 
-좌측 사이드 패널에는 아래 요소를 함께 둡니다.
-
-- `소비기한 운영` 제목
-- 등록 시작 버튼
-- `오늘 처리 / 미확인` 수량
-- 미확인 목록
-
-메인 상단에는 아래 전환 버튼을 둡니다.
-
-- 운영 화면
-- 아카이브 조회
-
-메인 영역에서는 아래 목록을 조회합니다.
-
-- 오늘 처리 리스트
-- 전체 리스트
-
-메인 처리 대상에서는 아래 흐름을 다룹니다.
-
-- `폐기 완료`: 실제 폐기 수량 저장 후 `미확인` 전환
-- `폐기 없음`: 이미 판매되어 폐기할 수량이 없을 때, 다음 소비기한을 바로 입력하거나 `미확인`으로 넘기기
-
-이후에는 누적된 폐기 데이터를 바탕으로 발주 판단에 참고할 수 있는 구조로 확장하는 방향을 염두에 두고 있습니다.
-
-현재 프론트엔드 소스는 `frontend/`, 백엔드 소스는 `app/`에 있습니다.
+이후에는 누적된 폐기 데이터를 바탕으로 발주 판단에 참고할 수 있는 구조와, 실제 배포 가능한 운영 형태로 확장하는 방향을 염두에 두고 있습니다.
 
 ## 문서
 
@@ -83,9 +112,9 @@
 
 구현 상세나 로컬 검증 기준이 궁금하다면 아래 문서를 보면 됩니다.
 
+- [Backend Quickstart](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-quickstart.md)
 - [Backend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-implementation-guide.md)
 - [Frontend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/frontend-implementation-guide.md)
-- [Backend Quickstart](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-quickstart.md)
 - [Tech Stack Decision](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/tech-stack-decision.md)
 
 ### 참고 문서

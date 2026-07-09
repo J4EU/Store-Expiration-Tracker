@@ -1,5 +1,5 @@
 {
-  "name": "store-expiry-manager-frontend",
+  "name": "store-expiration-tracker-frontend",
   "private": true,
   "version": "0.1.0",
   "type": "module",

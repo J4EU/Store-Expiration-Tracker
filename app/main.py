@@ -120,7 +120,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="Store Expiry Manager API",
+    title="Store Expiration Tracker API",
     version="0.1.0",
     lifespan=lifespan,
 )

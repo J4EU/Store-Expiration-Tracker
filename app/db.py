@@ -8,7 +8,7 @@ from typing import Iterator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_DIR = BASE_DIR / "data"
-DB_PATH = DB_DIR / "store_expiry_manager.db"
+DB_PATH = DB_DIR / "store_expiration_tracker.db"
 SCHEMA_PATH = BASE_DIR / "db" / "schema.sql"
 
 
