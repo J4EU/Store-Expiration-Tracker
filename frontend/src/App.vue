@@ -6,9 +6,12 @@ import {
   createDiscard,
   createNoDiscard,
   createProduct,
+  fetchSession,
   fetchArchivedProducts,
   fetchDashboard,
+  login,
   lookupProduct,
+  logout,
   restoreProduct,
   updateExpiration,
   updateProduct,
@@ -54,6 +57,28 @@ function classifyDueItem(item, referenceDate) {
 
 function normalizeCategory(category) {
   return category === DAIRY_CATEGORY ? DAIRY_CATEGORY : DEFAULT_CATEGORY;
+}
+
+function formatSessionExpiry(value) {
+  if (!value) {
+    return "";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(parsed);
 }
 
 function isTodayProcessingItem(item, referenceDate) {
@@ -115,13 +140,24 @@ const currentView = ref("dashboard");
 const dueFilter = ref("today_processing");
 const dashboardLoading = ref(false);
 const archiveLoading = ref(false);
+const sessionLoading = ref(true);
+const authSubmitting = ref(false);
 const savingModal = ref(false);
 const barcodeLookupLoading = ref(false);
 const archiveSearch = ref("");
 const errorMessage = ref("");
+const authErrorMessage = ref("");
 const editTargetId = ref(null);
 const editField = ref("");
 const moreMenuTargetId = ref(null);
+const isAuthenticated = ref(false);
+const currentUsername = ref("");
+const sessionExpiresAt = ref("");
+
+const loginForm = reactive({
+  username: "admin",
+  password: "",
+});
 
 const dashboard = reactive({
   dueItems: [],
@@ -223,6 +259,19 @@ const focusHeadline = computed(() => {
   return `오늘 처리 대상 ${dueCounts.value.today_processing}개가 준비되어 있습니다.`;
 });
 
+const sessionStatusLabel = computed(() => {
+  if (!currentUsername.value) {
+    return "";
+  }
+
+  const segments = [`${currentUsername.value} 로그인 중`];
+  if (sessionExpiresAt.value) {
+    segments.push(`만료 ${formatSessionExpiry(sessionExpiresAt.value)} KST`);
+  }
+
+  return segments.join(" · ");
+});
+
 function resetModalFields() {
   modal.barcode = "";
   modal.expirationDate = "";
@@ -309,6 +358,47 @@ function openDatePicker(event) {
   input.showPicker?.();
 }
 
+function resetWorkspaceState() {
+  dashboard.dueItems = [];
+  dashboard.uncheckedItems = [];
+  archivedItems.value = [];
+  errorMessage.value = "";
+  currentView.value = "dashboard";
+  dueFilter.value = "today_processing";
+  editTargetId.value = null;
+  editField.value = "";
+  moreMenuTargetId.value = null;
+  resetModal();
+  resetNoDiscardModal();
+}
+
+function applySession(data) {
+  isAuthenticated.value = data.authenticated;
+  currentUsername.value = data.username ?? "";
+  sessionExpiresAt.value = data.expires_at ?? "";
+}
+
+function handleUnauthorized(message = "세션이 만료되었거나 로그인이 필요합니다.") {
+  applySession({
+    authenticated: false,
+    username: null,
+    expires_at: null,
+  });
+  authErrorMessage.value = message;
+  loginForm.password = "";
+  resetWorkspaceState();
+}
+
+function consumeRequestError(error, setMessage) {
+  if (error?.status === 401) {
+    handleUnauthorized();
+    return true;
+  }
+
+  setMessage(error.message);
+  return false;
+}
+
 function nextDayOffset(days) {
   const base = new Date(`${referenceDate.value}T00:00:00`);
   base.setDate(base.getDate() + days);
@@ -322,6 +412,10 @@ function useToday() {
 }
 
 async function loadDashboard() {
+  if (!isAuthenticated.value) {
+    return;
+  }
+
   dashboardLoading.value = true;
   errorMessage.value = "";
 
@@ -330,13 +424,19 @@ async function loadDashboard() {
     dashboard.dueItems = data.due_items;
     dashboard.uncheckedItems = data.unchecked_items;
   } catch (error) {
-    errorMessage.value = error.message;
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
   } finally {
     dashboardLoading.value = false;
   }
 }
 
 async function loadArchivedProducts() {
+  if (!isAuthenticated.value) {
+    return;
+  }
+
   archiveLoading.value = true;
   errorMessage.value = "";
 
@@ -344,7 +444,9 @@ async function loadArchivedProducts() {
     const data = await fetchArchivedProducts(archiveSearch.value);
     archivedItems.value = data.items;
   } catch (error) {
-    errorMessage.value = error.message;
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
   } finally {
     archiveLoading.value = false;
   }
@@ -385,7 +487,9 @@ async function handleBarcodeLookup() {
       newNameInputRef.value?.focus();
     }
   } catch (error) {
-    modal.error = error.message;
+    consumeRequestError(error, (message) => {
+      modal.error = message;
+    });
   } finally {
     barcodeLookupLoading.value = false;
   }
@@ -421,7 +525,9 @@ async function submitModal() {
     barcodeInputRef.value?.focus();
     showSuccessToast(successMessage);
   } catch (error) {
-    modal.error = error.message;
+    consumeRequestError(error, (message) => {
+      modal.error = message;
+    });
   } finally {
     savingModal.value = false;
   }
@@ -477,48 +583,66 @@ function editFieldLabel(field) {
 }
 
 async function submitProductEdit(item) {
-  if (editField.value === "expiration") {
-    await updateExpiration(item.id, {
-      expiration_date: expirationDrafts[item.id] || null,
+  try {
+    if (editField.value === "expiration") {
+      await updateExpiration(item.id, {
+        expiration_date: expirationDrafts[item.id] || null,
+      });
+    } else {
+      const draft = ensureProductDraft(item);
+      const payload = {};
+
+      if (editField.value === "name") {
+        payload.name = draft.name;
+      }
+
+      if (editField.value === "barcode") {
+        payload.barcode = draft.barcode;
+      }
+
+      if (editField.value === "category") {
+        payload.category = draft.category;
+      }
+
+      await updateProduct(item.id, payload);
+    }
+
+    closeProductEdit();
+    await loadDashboard();
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
     });
-  } else {
-    const draft = ensureProductDraft(item);
-    const payload = {};
-
-    if (editField.value === "name") {
-      payload.name = draft.name;
-    }
-
-    if (editField.value === "barcode") {
-      payload.barcode = draft.barcode;
-    }
-
-    if (editField.value === "category") {
-      payload.category = draft.category;
-    }
-
-    await updateProduct(item.id, payload);
   }
-
-  closeProductEdit();
-  await loadDashboard();
 }
 
 async function clearCategoryEdit(item) {
-  ensureProductDraft(item).category = DEFAULT_CATEGORY;
-  await updateProduct(item.id, { category: DEFAULT_CATEGORY });
-  closeProductEdit();
-  await loadDashboard();
+  try {
+    ensureProductDraft(item).category = DEFAULT_CATEGORY;
+    await updateProduct(item.id, { category: DEFAULT_CATEGORY });
+    closeProductEdit();
+    await loadDashboard();
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
+  }
 }
 
 async function submitDiscard(item) {
-  const draft = discardDrafts[item.id] ?? { quantity: 1 };
+  try {
+    const draft = discardDrafts[item.id] ?? { quantity: 1 };
 
-  await createDiscard({
-    product_id: item.id,
-    quantity: Number(draft.quantity),
-  });
-  await loadDashboard();
+    await createDiscard({
+      product_id: item.id,
+      quantity: Number(draft.quantity),
+    });
+    await loadDashboard();
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
+  }
 }
 
 async function submitNoDiscard(saveExpiration) {
@@ -547,33 +671,53 @@ async function submitNoDiscard(saveExpiration) {
     resetNoDiscardModal();
     await loadDashboard();
   } catch (error) {
-    noDiscardModal.error = error.message;
+    consumeRequestError(error, (message) => {
+      noDiscardModal.error = message;
+    });
   } finally {
     noDiscardModal.saving = false;
   }
 }
 
 async function submitUncheckedExpiration(item) {
-  const draft = uncheckedDrafts[item.id] ?? { expiration_date: "" };
-  await updateExpiration(item.id, {
-    expiration_date: draft.expiration_date || null,
-  });
-  await loadDashboard();
+  try {
+    const draft = uncheckedDrafts[item.id] ?? { expiration_date: "" };
+    await updateExpiration(item.id, {
+      expiration_date: draft.expiration_date || null,
+    });
+    await loadDashboard();
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
+  }
 }
 
 async function submitArchive(item) {
-  await archiveProduct(item.id);
-  await loadDashboard();
-  if (currentView.value === "archive") {
-    await loadArchivedProducts();
+  try {
+    await archiveProduct(item.id);
+    await loadDashboard();
+    if (currentView.value === "archive") {
+      await loadArchivedProducts();
+    }
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
   }
 }
 
 async function submitRestore(item) {
-  await restoreProduct(item.id);
-  await loadArchivedProducts();
-  if (currentView.value === "dashboard") {
-    await loadDashboard();
+  try {
+    await restoreProduct(item.id);
+    await loadArchivedProducts();
+    if (currentView.value === "dashboard") {
+      await loadDashboard();
+    }
+  } catch (error) {
+    consumeRequestError(error, (message) => {
+      errorMessage.value = message;
+    });
   }
 }
 
@@ -593,8 +737,70 @@ function ensureUncheckedDraft(itemId) {
   return uncheckedDrafts[itemId];
 }
 
+async function bootstrapSession() {
+  sessionLoading.value = true;
+  authErrorMessage.value = "";
+
+  try {
+    const data = await fetchSession();
+    applySession(data);
+    if (data.authenticated) {
+      await loadDashboard();
+    }
+  } catch (error) {
+    authErrorMessage.value = error.message;
+    applySession({
+      authenticated: false,
+      username: null,
+      expires_at: null,
+    });
+  } finally {
+    sessionLoading.value = false;
+  }
+}
+
+async function submitLogin() {
+  if (authSubmitting.value) {
+    return;
+  }
+
+  authSubmitting.value = true;
+  authErrorMessage.value = "";
+
+  try {
+    const data = await login({
+      username: loginForm.username,
+      password: loginForm.password,
+    });
+    applySession(data);
+    loginForm.password = "";
+    errorMessage.value = "";
+    await loadDashboard();
+  } catch (error) {
+    authErrorMessage.value = error.message;
+  } finally {
+    authSubmitting.value = false;
+  }
+}
+
+async function submitLogout() {
+  if (authSubmitting.value) {
+    return;
+  }
+
+  authSubmitting.value = true;
+  try {
+    await logout();
+  } catch {
+    // Even if logout request fails, clear the local session gate to avoid a stuck UI.
+  } finally {
+    authSubmitting.value = false;
+    handleUnauthorized("로그아웃되었습니다.");
+  }
+}
+
 onMounted(() => {
-  loadDashboard();
+  bootstrapSession();
 });
 
 onBeforeUnmount(() => {
@@ -605,7 +811,46 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div v-if="sessionLoading" class="auth-shell">
+    <section class="auth-card auth-card-status">
+      <p class="section-label">Session</p>
+      <h1>운영 세션 확인 중</h1>
+      <p class="hero-copy">저장된 로그인 상태를 먼저 확인하고 있습니다.</p>
+    </section>
+  </div>
+
+  <div v-else-if="!isAuthenticated" class="auth-shell">
+    <section class="auth-card">
+      <p class="section-label">Operator Login</p>
+      <h1>운영 화면 로그인</h1>
+      <p class="hero-copy">
+        `GET /health`를 제외한 운영 API는 로그인 뒤에만 열립니다. 현재는 단일
+        운영자 계정으로 먼저 관리합니다.
+      </p>
+
+      <form class="auth-form" @submit.prevent="submitLogin">
+        <label>
+          운영자 아이디
+          <input v-model="loginForm.username" type="text" autocomplete="username" />
+        </label>
+        <label>
+          비밀번호
+          <input
+            v-model="loginForm.password"
+            type="password"
+            autocomplete="current-password"
+          />
+        </label>
+        <button class="primary-button large full-button" :disabled="authSubmitting" type="submit">
+          로그인
+        </button>
+      </form>
+
+      <p v-if="authErrorMessage" class="error-banner auth-error">{{ authErrorMessage }}</p>
+    </section>
+  </div>
+
+  <div v-else class="app-shell">
     <div class="app-frame">
       <aside class="workspace-sidebar">
         <div class="sidebar-top">
@@ -733,6 +978,9 @@ onBeforeUnmount(() => {
                   : "보관된 상품 조회"
               }}
             </h2>
+            <p v-if="sessionStatusLabel" class="session-meta">
+              {{ sessionStatusLabel }}
+            </p>
           </div>
 
           <nav class="main-nav-actions">
@@ -748,6 +996,7 @@ onBeforeUnmount(() => {
             >
               아카이브 조회
             </button>
+            <button class="nav-button" @click="submitLogout">로그아웃</button>
           </nav>
         </header>
 

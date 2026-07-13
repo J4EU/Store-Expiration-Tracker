@@ -3,18 +3,30 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import date, timedelta
 
-from fastapi import FastAPI, HTTPException, Query, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth import (
+    authenticate_user,
+    build_session_response,
+    clear_session_cookie,
+    ensure_admin_user,
+    get_settings,
+    read_session_from_request,
+    require_authenticated_user,
+    set_session_cookie,
+)
 from app.db import get_connection, init_db
 from app.schemas import (
     ArchiveResponse,
+    AuthSessionResponse,
     ArchivedProductsResponse,
     DashboardResponse,
     DiscardCreate,
     DiscardResponse,
     ExpirationUpdate,
     HealthResponse,
+    LoginRequest,
     NoDiscardCreate,
     ProductCreate,
     ProductLookupResponse,
@@ -115,7 +127,10 @@ def _normalized_required_text(value: str, field_name: str) -> str:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    settings = get_settings()
     init_db()
+    with get_connection() as connection:
+        ensure_admin_user(connection, settings)
     yield
 
 
@@ -143,6 +158,38 @@ def health_check() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
+@app.post("/auth/login", response_model=AuthSessionResponse)
+def login(
+    payload: LoginRequest,
+    response: Response,
+) -> AuthSessionResponse:
+    username = _normalized_required_text(payload.username, "username")
+    password = _normalized_required_text(payload.password, "password")
+
+    with get_connection() as connection:
+        if not authenticate_user(connection, username, password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="아이디 또는 비밀번호가 올바르지 않습니다.",
+            )
+
+    session = set_session_cookie(response, get_settings(), username)
+    return AuthSessionResponse.model_validate(build_session_response(session))
+
+
+@app.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response) -> Response:
+    clear_session_cookie(response)
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
+
+
+@app.get("/auth/session", response_model=AuthSessionResponse)
+def get_session(request: Request) -> AuthSessionResponse:
+    session = read_session_from_request(request, get_settings())
+    return AuthSessionResponse.model_validate(build_session_response(session))
+
+
 @app.post(
     "/products",
     response_model=ProductMutationSummary,
@@ -151,6 +198,7 @@ def health_check() -> HealthResponse:
 def create_product(
     payload: ProductCreate,
     response: Response,
+    _: object = Depends(require_authenticated_user),
 ) -> ProductMutationSummary:
     barcode = _normalized_required_text(payload.barcode, "barcode")
     category = _normalized_category(payload.category)
@@ -199,7 +247,10 @@ def create_product(
 
 
 @app.get("/products/by-barcode", response_model=ProductLookupResponse)
-def get_product_by_barcode(barcode: str = Query(min_length=1)) -> ProductLookupResponse:
+def get_product_by_barcode(
+    barcode: str = Query(min_length=1),
+    _: object = Depends(require_authenticated_user),
+) -> ProductLookupResponse:
     normalized_barcode = _normalized_required_text(barcode, "barcode")
 
     with get_connection() as connection:
@@ -214,6 +265,7 @@ def get_product_by_barcode(barcode: str = Query(min_length=1)) -> ProductLookupR
 @app.get("/dashboard", response_model=DashboardResponse)
 def get_dashboard(
     reference_date: date = Query(default_factory=date.today),
+    _: object = Depends(require_authenticated_user),
 ) -> DashboardResponse:
     due_until = reference_date + timedelta(days=1)
 
@@ -283,6 +335,7 @@ def get_dashboard(
 def update_product(
     product_id: int,
     payload: ProductUpdate,
+    _: object = Depends(require_authenticated_user),
 ) -> ProductSummary:
     with get_connection() as connection:
         product = _fetch_product(connection, product_id)
@@ -357,6 +410,7 @@ def update_product(
 def update_expiration(
     product_id: int,
     payload: ExpirationUpdate,
+    _: object = Depends(require_authenticated_user),
 ) -> ProductSummary:
     with get_connection() as connection:
         product = _fetch_product(connection, product_id)
@@ -403,7 +457,10 @@ def update_expiration(
     response_model=DiscardResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_discard(payload: DiscardCreate) -> DiscardResponse:
+def create_discard(
+    payload: DiscardCreate,
+    _: object = Depends(require_authenticated_user),
+) -> DiscardResponse:
     discarded_date = date.today()
 
     with get_connection() as connection:
@@ -462,7 +519,10 @@ def create_discard(payload: DiscardCreate) -> DiscardResponse:
     response_model=ProductSummary,
     status_code=status.HTTP_200_OK,
 )
-def create_no_discard(payload: NoDiscardCreate) -> ProductSummary:
+def create_no_discard(
+    payload: NoDiscardCreate,
+    _: object = Depends(require_authenticated_user),
+) -> ProductSummary:
     with get_connection() as connection:
         product = _fetch_product(connection, payload.product_id)
 
@@ -504,7 +564,10 @@ def create_no_discard(payload: NoDiscardCreate) -> ProductSummary:
 
 
 @app.patch("/products/{product_id}/archive", response_model=ArchiveResponse)
-def archive_product(product_id: int) -> ArchiveResponse:
+def archive_product(
+    product_id: int,
+    _: object = Depends(require_authenticated_user),
+) -> ArchiveResponse:
     with get_connection() as connection:
         product = _fetch_product(connection, product_id)
 
@@ -539,7 +602,10 @@ def archive_product(product_id: int) -> ArchiveResponse:
 
 
 @app.patch("/products/{product_id}/restore", response_model=ArchiveResponse)
-def restore_product(product_id: int) -> ArchiveResponse:
+def restore_product(
+    product_id: int,
+    _: object = Depends(require_authenticated_user),
+) -> ArchiveResponse:
     with get_connection() as connection:
         product = _fetch_product(connection, product_id)
 
@@ -585,6 +651,7 @@ def restore_product(product_id: int) -> ArchiveResponse:
 @app.get("/archived-products", response_model=ArchivedProductsResponse)
 def get_archived_products(
     query: str | None = Query(default=None),
+    _: object = Depends(require_authenticated_user),
 ) -> ArchivedProductsResponse:
     normalized_query = _normalized_optional_text(query)
 

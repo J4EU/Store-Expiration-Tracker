@@ -48,6 +48,47 @@ button {
   min-height: 100vh;
 }
 
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(10, 204, 0, 0.14), transparent 28%),
+    linear-gradient(180deg, #f5f7fb 0%, #eef4f0 100%);
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.1);
+}
+
+.auth-card-status {
+  text-align: center;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-form label,
+.modal-stack label,
+.modal-form-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-error {
+  margin-top: 4px;
+}
+
 .app-shell {
   width: min(1360px, calc(100% - 24px));
   height: 100vh;
@@ -103,6 +144,15 @@ h3 {
 .meta-line,
 .command-copy p:last-child {
   color: var(--muted);
+}
+
+.session-meta {
+  margin-top: 2px;
+  font-family: "JetBrains Mono", "SFMono-Regular", monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #4b5563;
 }
 
 .mono {
@@ -321,6 +371,19 @@ h3 {
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
 }
 
+.view-button:disabled,
+.ghost-button:disabled,
+.primary-button:disabled,
+.support-button:disabled,
+.warn-button:disabled,
+.tab-button:disabled,
+.nav-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .primary-button.large {
   padding-inline: 16px;
   min-height: 38px;
@@ -514,6 +577,7 @@ h3 {
 .text-date-input,
 input[type="date"],
 input[type="text"],
+input[type="password"],
 input[type="number"],
 select {
   width: 100%;

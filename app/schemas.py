@@ -12,6 +12,17 @@ class ProductCreate(BaseModel):
     expiration_date: date | None = None
 
 
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1)
+    password: str = Field(min_length=1)
+
+
+class AuthSessionResponse(BaseModel):
+    authenticated: bool
+    username: str | None = None
+    expires_at: datetime | None = None
+
+
 class ProductSummary(BaseModel):
     id: int
     barcode: str
