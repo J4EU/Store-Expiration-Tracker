@@ -46,6 +46,18 @@ CREATE TABLE IF NOT EXISTS discard_histories (
         ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE
+        CHECK (length(trim(username)) > 0),
+    password_hash TEXT NOT NULL
+        CHECK (length(trim(password_hash)) > 0),
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        CHECK (datetime(created_at) IS NOT NULL)
+);
+
 CREATE TRIGGER IF NOT EXISTS trg_products_insert_create_expiration_state
 AFTER INSERT ON products
 BEGIN
@@ -75,3 +87,6 @@ CREATE INDEX IF NOT EXISTS idx_expiration_states_expiration_date
 
 CREATE INDEX IF NOT EXISTS idx_discard_histories_product_date
     ON discard_histories (product_id, discarded_date);
+
+CREATE INDEX IF NOT EXISTS idx_users_username
+    ON users (username);
