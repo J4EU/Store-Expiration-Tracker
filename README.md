@@ -141,6 +141,7 @@ npm run dev
 
 세부 이슈 검토나 보강 개념 문서는 아래에 따로 둡니다.
 
-- [Issue #10 Review: 폐기 수량 0 상황 처리 정책 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-10-no-discard-flow.md)
-- [Issue #6 Review: 폐기 이력 저장 범위 재검토](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-6-discard-history-review.md)
 - [MVP DB Concept](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-db-concept.md)
+- [Issue #6 Review: 폐기 이력 저장 범위 재검토](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-6-discard-history-review.md)
+- [Issue #10 Review: 폐기 수량 0 상황 처리 정책 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-10-no-discard-flow.md)
+- [Issue #20 Review: 배포용 인증/세션 설정 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-20-deployment-auth-session-policy.md)
