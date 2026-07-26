@@ -146,3 +146,4 @@ npm run dev
 - [Issue #10 Review: 폐기 수량 0 상황 처리 정책 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-10-no-discard-flow.md)
 - [Issue #20 Review: 배포용 인증/세션 설정 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-20-deployment-auth-session-policy.md)
 - [Issue #21 Review: 로컬/배포 환경변수 기반 연결 설정 분리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-21-env-config-separation.md)
+- [Issue #22 Review: 운영 배포 공개 범위와 비밀값 운영 기준 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-22-public-scope-secret-operations.md)
