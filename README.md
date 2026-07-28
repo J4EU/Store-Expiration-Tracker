@@ -137,6 +137,13 @@ npm run dev
 - [Frontend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/frontend-implementation-guide.md)
 - [Tech Stack Decision](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/tech-stack-decision.md)
 
+### 배포 전 확인
+
+배포 작업에 들어가기 전에는 아래 Runbook을 먼저 확인합니다.
+
+- [배포 전 인증 검증 Runbook 초안](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/pre-deploy-auth-runbook.md)
+- [Issue #23 Review: 배포 전 인증 검증 체크리스트 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-23-pre-deploy-auth-checklist.md)
+
 ### 참고 문서
 
 세부 이슈 검토나 보강 개념 문서는 아래에 따로 둡니다.
