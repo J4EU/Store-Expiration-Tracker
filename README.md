@@ -42,7 +42,7 @@ export SESSION_SECRET='change-this-session-secret'
 uvicorn app.main:app --reload
 ```
 
-- API 문서: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- API 문서: [http://localhost:8000/docs](http://localhost:8000/docs)
 - DB 파일: `data/store_expiration_tracker.db`
 
 ### 프론트엔드
@@ -50,10 +50,19 @@ uvicorn app.main:app --reload
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-- 개발 서버: [http://127.0.0.1:5173](http://127.0.0.1:5173)
+- 개발 서버: [http://localhost:5173](http://localhost:5173)
+- 프론트 API 기준: `VITE_API_BASE_URL=/api`
+- production 빌드 기준: `VITE_API_BASE_URL=/api`
+
+로컬 개발에서는 프론트가 `/api/...`로 요청하고, Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000/...`으로 프록시합니다. FastAPI 라우트는 현재처럼 `/auth/login`, `/dashboard`, `/products` 등을 유지합니다.
+
+현재 MVP는 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Issue #28 SPA fallback and routing policy](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-28-spa-fallback-routing-policy.md)에 정리합니다.
+
+실제 `/api` reverse proxy 구현과 검증은 배포 구조 이슈에서 별도로 진행합니다.
 
 처음 확인할 때는 `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 순서로 보면 됩니다.
 

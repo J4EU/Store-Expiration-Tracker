@@ -1,6 +1,8 @@
 .venv/
 __pycache__/
 *.pyc
+.env
+frontend/.env
 
 data/
 frontend/node_modules/

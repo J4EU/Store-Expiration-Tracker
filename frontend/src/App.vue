@@ -23,6 +23,15 @@ const CATEGORY_OPTIONS = [
   { value: DEFAULT_CATEGORY, label: "미선택" },
   { value: DAIRY_CATEGORY, label: "유제품" },
 ];
+const APP_ENTRY_PATH = "/";
+
+function normalizeEntryPath() {
+  if (window.location.pathname === APP_ENTRY_PATH) {
+    return;
+  }
+
+  window.history.replaceState(window.history.state, "", APP_ENTRY_PATH);
+}
 
 function formatLocalDate(date) {
   const year = date.getFullYear();
@@ -800,6 +809,7 @@ async function submitLogout() {
 }
 
 onMounted(() => {
+  normalizeEntryPath();
   bootstrapSession();
 });
 

@@ -19,7 +19,7 @@ uvicorn app.main:app --reload
 ```
 
 서버를 실행하면 DB 파일은 `data/store_expiration_tracker.db`에 자동 생성된다.
-API 문서는 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)에서 확인할 수 있다.
+API 문서는 [http://localhost:8000/docs](http://localhost:8000/docs)에서 확인할 수 있다.
 
 현재 로컬 실행에도 아래 접근 제어 기준을 반영한다.
 
@@ -45,24 +45,29 @@ API 문서는 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)에서 확
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-Vue 개발 서버 기본 주소는 [http://127.0.0.1:5173](http://127.0.0.1:5173)이다.
+Vue 개발 서버 기본 주소는 [http://localhost:5173](http://localhost:5173)이다.
+프론트 API 주소는 `VITE_API_BASE_URL`로 명시하며, 로컬 개발 기본값은 `/api`이다.
 로컬 개발 편의를 위해 백엔드에는 `5173` 기준 CORS를 열어둔다.
 
 ## 빠른 확인 순서
 
 1. 백엔드 서버를 실행한다.
 2. 별도 터미널에서 프론트 개발 서버를 실행한다.
-3. 브라우저에서 [http://127.0.0.1:5173](http://127.0.0.1:5173)로 접속한다.
+3. 브라우저에서 [http://localhost:5173](http://localhost:5173)로 접속한다.
 4. 로그인 화면에서 기본 운영자 계정 `admin`과 서버에 설정한 비밀번호로 로그인한다.
 5. `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 흐름으로 기본 동작을 본다.
 
-로컬 테스트에서는 프론트와 API 문서를 같은 호스트 계열로 맞춰 쓰는 편이 안전하다.
+로컬 테스트에서는 프론트와 API 요청을 같은 프론트 origin 아래에서 확인한다.
 
-- 프론트를 `127.0.0.1`로 열었다면 API 문서도 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)로 연다.
-- `127.0.0.1`와 `localhost`를 섞으면 호스트 전용 쿠키가 공유되지 않아 로그인 상태가 다르게 보일 수 있다.
+- 기본 확인 기준은 브라우저에서 `localhost:5173/api/...`로 요청이 나가는 흐름이다.
+- Vite dev server는 `/api` prefix를 제거해 `http://localhost:8000/...`으로 프록시한다.
+- API 문서는 백엔드에 직접 접속해 [http://localhost:8000/docs](http://localhost:8000/docs)에서 확인한다.
+- 현재 MVP의 공식 프론트 화면 URL은 `/` 하나이며, fallback으로 열린 `/auth/session`, `/dashboard` 같은 경로는 앱 부팅 시 `/`로 정규화한다.
+- production 빌드는 `VITE_API_BASE_URL=/api`를 기준으로 두며, 실제 `/api` reverse proxy 구현과 검증은 배포 구조가 확정된 뒤 별도로 진행한다.
 
 ## 현재 위치
 

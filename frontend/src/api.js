@@ -1,10 +1,7 @@
 function resolveApiBaseUrl() {
-  if (typeof window === "undefined") {
-    return "http://127.0.0.1:8000";
-  }
-
-  const { protocol, hostname } = window.location;
-  return `${protocol}//${hostname}:8000`;
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  const baseUrl = configuredBaseUrl || "/api";
+  return baseUrl.replace(/\/+$/, "");
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
