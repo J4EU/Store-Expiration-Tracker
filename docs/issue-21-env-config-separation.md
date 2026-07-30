@@ -26,7 +26,9 @@
 
 - 프론트 개발 서버는 `5173` 포트에서 실행된다.
 - 백엔드는 FastAPI 서버가 `8000` 포트에서 실행된다.
-- 프론트는 현재 페이지의 `protocol`과 `hostname`을 읽고 `:8000`을 붙여 API 주소를 만든다.
+- 프론트는 `VITE_API_BASE_URL`로 API 주소를 결정한다.
+- 로컬 개발 기본값은 `/api`이다.
+- Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000` 백엔드로 프록시한다.
 - 백엔드 CORS는 `localhost`, `127.0.0.1`, `5173`, `4173` 개발 서버 기준으로 열려 있다.
 - 인증에 필요한 `ADMIN_PASSWORD`, `SESSION_SECRET`은 서버 시작 전 셸에서 `export`로 주입하는 흐름에 가깝다.
 - 인증 쿠키는 현재 코드에서 `secure=False`로 설정되어 있다.
@@ -99,22 +101,23 @@ https://example.com/api/products
 
 ### 3. 프론트 코드는 API 주소를 자동 추론하지 않는다
 
-현재 프론트 코드는 브라우저의 현재 hostname을 읽고 `:8000`을 붙인다.
-이 방식은 로컬에서는 편하지만, production 코드에 로컬 포트 전제를 남긴다.
+이전 프론트 코드는 브라우저의 현재 hostname을 읽고 `:8000`을 붙였다.
+이 방식은 로컬에서는 편하지만, production 코드에 로컬 포트 전제를 남겼다.
 
-따라서 다음 구현에서는 프론트 코드가 환경을 추론하지 않고 `VITE_API_BASE_URL`만 사용하도록 정리한다.
+현재 프론트 코드는 환경을 추론하지 않고 `VITE_API_BASE_URL`을 우선 사용한다.
+값이 없을 때의 fallback도 `/api`로 둔다.
 
 환경별 기준값은 아래와 같다.
 
 ```text
 development:
-VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_API_BASE_URL=/api
 
 production:
 VITE_API_BASE_URL=/api
 ```
 
-즉 코드는 하나로 통일하고, 로컬/배포 차이는 환경변수 값으로만 나눈다.
+즉 프론트 요청 경로는 `/api`로 통일하고, 로컬에서는 Vite dev server, production에서는 Nginx가 `/api` prefix를 제거해 FastAPI 기존 라우트로 전달한다.
 
 ### 4. CORS는 환경 분리 안에서 다룬다
 
@@ -220,7 +223,7 @@ production에서는 same origin 기준이므로 개발용 CORS allowlist를 그�
 ### Frontend
 
 ```text
-VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_API_BASE_URL=/api
 ```
 
 production build에서는 아래 값을 기준으로 둔다.
@@ -266,8 +269,12 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - Nginx는 `/api` prefix를 제거한 뒤 FastAPI에 전달한다.
 - FastAPI 내부 라우트는 현재 경로를 유지한다.
 - 프론트 API 주소는 `VITE_API_BASE_URL` 환경변수로만 결정한다.
-- development의 `VITE_API_BASE_URL`은 `http://127.0.0.1:8000`으로 둔다.
+- development의 `VITE_API_BASE_URL`은 `/api`로 둔다.
+- development에서는 Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000` 백엔드로 프록시한다.
 - production의 `VITE_API_BASE_URL`은 `/api`로 둔다.
+- 현재 MVP의 공식 프론트 화면 URL은 `/` 하나로 둔다.
+- fallback으로 열린 정의되지 않은 프론트 경로는 앱 부팅 시 `/`로 정규화한다.
+- SPA fallback과 routing 정책은 `docs/issue-28-spa-fallback-routing-policy.md`에서 다룬다.
 - development CORS allowlist는 로컬 프론트 개발 서버 origin을 허용한다.
 - production에서는 same origin 기준으로 개발용 CORS allowlist를 사용하지 않는다.
 - development의 `SESSION_COOKIE_SECURE`는 `false`로 둔다.
@@ -279,11 +286,11 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - 구체적인 Docker Compose 주입 방식은 학습과 배포 아키텍처 검토 후 확정한다.
 - 실제 production 비밀값은 Git에 커밋하지 않는다.
 
-## 다음 반영 후보
+## 반영 상태와 다음 후보
 
-- 프론트 API base URL을 `VITE_API_BASE_URL` 기준으로 변경하기
+- 반영됨: 프론트 API base URL을 `VITE_API_BASE_URL` 기준으로 변경하기
+- 반영됨: 로컬 `frontend/.env.example` 작성하기
 - 백엔드 CORS allowlist를 환경변수 기반으로 변경하기
 - 쿠키 `secure` 설정을 `SESSION_COOKIE_SECURE` 기준으로 변경하기
-- 로컬 `.env.example` 작성하기
 - production 환경변수 주입 예시와 Git 제외 규칙 정리하기
 - Docker Compose env 주입 방식 학습 및 배포 설정에 반영하기

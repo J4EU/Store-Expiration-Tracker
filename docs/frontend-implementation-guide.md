@@ -184,4 +184,10 @@ Vue 1차 구현에서 반드시 확인해야 할 것은 아래와 같다.
 
 - Vue 앱 루트는 `frontend/` 디렉터리다.
 - 기본 실행은 `npm install` 후 `npm run dev`다.
-- 백엔드 API 주소는 로컬 개발 기준 `http://127.0.0.1:8000`으로 연결한다.
+- 백엔드 API 주소는 `VITE_API_BASE_URL`로 명시한다.
+- 로컬 개발과 production 빌드 기준은 모두 `/api`다.
+- 로컬 개발에서는 Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000` 백엔드로 프록시한다.
+- 현재 MVP는 Vue Router를 사용하지 않고 공식 화면 URL을 `/` 하나로 둔다.
+- fallback으로 열린 정의되지 않은 프론트 경로는 앱 부팅 시 `/`로 정규화한다.
+- SPA fallback과 routing 정책은 `docs/issue-28-spa-fallback-routing-policy.md`를 기준으로 둔다.
+- production의 실제 `/api` reverse proxy 구현과 검증은 배포 구조가 확정된 뒤 별도 이슈에서 확인한다.
