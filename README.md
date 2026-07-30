@@ -141,6 +141,7 @@ npm run dev
 
 구현 상세나 로컬 검증 기준이 궁금하다면 아래 문서를 보면 됩니다.
 
+- [Project Workflow](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-workflow.md)
 - [Backend Quickstart](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-quickstart.md)
 - [Backend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-implementation-guide.md)
 - [Frontend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/frontend-implementation-guide.md)
