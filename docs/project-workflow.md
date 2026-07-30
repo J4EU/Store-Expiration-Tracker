@@ -2,6 +2,19 @@
 
 이 문서는 저장소 작업 방식에서 반복적으로 참고할 운영 기준을 짧게 기록한다.
 
+## Main 보호 정책
+
+2026-07-30부터 `main` 브랜치에 `Protect main` ruleset을 적용한다.
+
+현재 기준은 아래와 같다.
+
+- `main` 브랜치에는 직접 push하지 않고 PR을 통해 병합한다.
+- `main` 브랜치 삭제와 non-fast-forward push를 허용하지 않는다.
+- PR 병합 방식은 merge commit과 squash merge를 허용한다.
+- rebase merge는 현재 허용하지 않는다.
+- 필수 승인 리뷰 수는 두지 않지만, 열린 review thread는 병합 전에 해결한다.
+- 로컬에서 실수로 `main`에 커밋한 경우, 해당 커밋을 작업 브랜치로 옮겨 PR을 만든다.
+
 ## Merge 방식
 
 2026-07-30부터 `main` 병합 방식은 squash merge를 기본 전략으로 시험한다.
