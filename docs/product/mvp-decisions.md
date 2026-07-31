@@ -11,7 +11,7 @@
 
 ## 0. MVP 방향 전환 배경
 
-방향 전환 자체의 배경과 흐름은 [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md) 문서에서 따로 정리한다.
+방향 전환 자체의 배경과 흐름은 [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-pivot.md) 문서에서 따로 정리한다.
 
 이 문서에서는 그 방향 전환 이후 확정된 설계 결론만 다룬다.
 
