@@ -115,7 +115,7 @@ Issue #23은 새 정책을 정하지 않는다.
 따라서 실행 절차와 결과 기록 칸은 별도 Runbook 초안에 둔다.
 
 ```text
-docs/pre-deploy-auth-runbook.md
+docs/deployment/pre-deploy-auth-runbook.md
 ```
 
 Runbook은 아래 역할을 가진다.
@@ -148,8 +148,8 @@ README에는 `배포 전 확인` 섹션을 두어 Runbook 진입점을 노출한
 
 - Issue #23은 Issue #21, Issue #22에서 정한 기준을 실제 배포 URL에서 확인하는 후속 검증 이슈다.
 - 체크리스트는 production 설정, 공개 범위, reverse proxy, 로그인/세션, 보호 API, 쿠키, CORS 검증을 포함한다.
-- 실행 순서와 결과 기록 칸은 `docs/pre-deploy-auth-runbook.md`에 둔다.
-- `docs/issue-23-pre-deploy-auth-checklist.md`는 검증 기준과 범위를 정리하는 결정 문서로 둔다.
+- 실행 순서와 결과 기록 칸은 `docs/deployment/pre-deploy-auth-runbook.md`에 둔다.
+- `docs/deployment/issue-23-pre-deploy-auth-checklist.md`는 검증 기준과 범위를 정리하는 결정 문서로 둔다.
 - README에는 배포 전 확인 진입점을 둔다.
 - 체크리스트 실패 항목은 그 자리에서 임의 수정하지 않고, 배포 작업 또는 후속 이슈로 책임을 분리한다.
 - 이번 이슈는 검증 절차를 정리하는 문서 작업이며, production 설정 구현은 후속 배포 작업으로 넘긴다.

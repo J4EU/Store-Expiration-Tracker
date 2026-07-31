@@ -18,7 +18,7 @@
 ## 관련 이슈
 
 - GitHub Issue: `#21 로컬/배포 환경변수 기반 연결 설정 분리`
-- 선행 문서: `docs/issue-20-deployment-auth-session-policy.md`
+- 선행 문서: `docs/deployment/issue-20-deployment-auth-session-policy.md`
 
 ## 현재 구현 상태
 
@@ -274,7 +274,7 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - production의 `VITE_API_BASE_URL`은 `/api`로 둔다.
 - 현재 MVP의 공식 프론트 화면 URL은 `/` 하나로 둔다.
 - fallback으로 열린 정의되지 않은 프론트 경로는 앱 부팅 시 `/`로 정규화한다.
-- SPA fallback과 routing 정책은 `docs/issue-28-spa-fallback-routing-policy.md`에서 다룬다.
+- SPA fallback과 routing 정책은 `docs/deployment/issue-28-spa-fallback-routing-policy.md`에서 다룬다.
 - development CORS allowlist는 로컬 프론트 개발 서버 origin을 허용한다.
 - production에서는 same origin 기준으로 개발용 CORS allowlist를 사용하지 않는다.
 - development의 `SESSION_COOKIE_SECURE`는 `false`로 둔다.

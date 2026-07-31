@@ -8,7 +8,7 @@
 
 하지만 실제 업무를 반복하면서, 기존 기능이 **현장의 작업 흐름과 잘 맞지 않는다**는 점이 분명해졌다. 등록, 조회, 폐기 과정이 자연스럽게 이어지지 않았고, 등록한 소비기한 정보를 지속적으로 신뢰하며 관리하기도 어려웠다.
 
-초기 MVP에서 실제 등록 작업을 거치며 방향을 어떻게 조정했는지는 [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md) 문서에서 따로 정리한다.
+초기 MVP에서 실제 등록 작업을 거치며 방향을 어떻게 조정했는지는 [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-pivot.md) 문서에서 따로 정리한다.
 
 ## 문제 의식
 

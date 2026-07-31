@@ -60,7 +60,7 @@ npm run dev
 
 로컬 개발에서는 프론트가 `/api/...`로 요청하고, Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000/...`으로 프록시합니다. FastAPI 라우트는 현재처럼 `/auth/login`, `/dashboard`, `/products` 등을 유지합니다.
 
-현재 MVP는 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Issue #28 SPA fallback and routing policy](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-28-spa-fallback-routing-policy.md)에 정리합니다.
+현재 MVP는 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Issue #28 SPA fallback and routing policy](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/deployment/issue-28-spa-fallback-routing-policy.md)에 정리합니다.
 
 실제 `/api` reverse proxy 구현과 검증은 배포 구조 이슈에서 별도로 진행합니다.
 
@@ -74,7 +74,7 @@ npm run dev
 
 핵심은 단순히 소비기한 날짜를 저장하는 것이 아니라, 한 번 관리 대상으로 올린 상품이 지금 `확인됨` 상태인지 `미확인` 상태인지가 시스템에 계속 남아 있도록 만드는 것입니다.
 
-초기 가정에서 출발해 실제 등록 작업 후 방향을 어떻게 조정했는지는 [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md), [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md), [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)에서 나눠 정리합니다.
+초기 가정에서 출발해 실제 등록 작업 후 방향을 어떻게 조정했는지는 [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/project-motivation.md), [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-pivot.md), [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-decisions.md)에서 나눠 정리합니다.
 
 ## 현재 범위
 
@@ -126,41 +126,4 @@ npm run dev
 
 ## 문서
 
-### 핵심 문서
-
-처음 읽는 사람이라면 아래 문서만 먼저 보면 됩니다.
-
-1. [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-motivation.md)
-2. [문제 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/problem.md)
-3. [초기 MVP](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp.md)
-4. [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-pivot.md)
-5. [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-decisions.md)
-6. [MVP Implementation Outline](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-implementation-outline.md)
-
-### 구현 문서
-
-구현 상세나 로컬 검증 기준이 궁금하다면 아래 문서를 보면 됩니다.
-
-- [Project Workflow](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/project-workflow.md)
-- [Backend Quickstart](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-quickstart.md)
-- [Backend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/backend-implementation-guide.md)
-- [Frontend Implementation Guide](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/frontend-implementation-guide.md)
-- [Tech Stack Decision](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/tech-stack-decision.md)
-
-### 배포 전 확인
-
-배포 작업에 들어가기 전에는 아래 Runbook을 먼저 확인합니다.
-
-- [배포 전 인증 검증 Runbook 초안](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/pre-deploy-auth-runbook.md)
-- [Issue #23 Review: 배포 전 인증 검증 체크리스트 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-23-pre-deploy-auth-checklist.md)
-
-### 참고 문서
-
-세부 이슈 검토나 보강 개념 문서는 아래에 따로 둡니다.
-
-- [MVP DB Concept](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/mvp-db-concept.md)
-- [Issue #6 Review: 폐기 이력 저장 범위 재검토](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-6-discard-history-review.md)
-- [Issue #10 Review: 폐기 수량 0 상황 처리 정책 정의](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-10-no-discard-flow.md)
-- [Issue #20 Review: 배포용 인증/세션 설정 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-20-deployment-auth-session-policy.md)
-- [Issue #21 Review: 로컬/배포 환경변수 기반 연결 설정 분리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-21-env-config-separation.md)
-- [Issue #22 Review: 운영 배포 공개 범위와 비밀값 운영 기준 정리](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/issue-22-public-scope-secret-operations.md)
+프로젝트의 제품 설계, 개발 기준, 배포 준비, 작업 규칙 문서는 [Documentation](docs/README.md)을 참고하세요.
