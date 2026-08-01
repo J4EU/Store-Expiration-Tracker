@@ -13,13 +13,16 @@ pip install -r requirements.txt
 ## 실행
 
 ```bash
-export ADMIN_PASSWORD='change-this-password'
-export SESSION_SECRET='change-this-session-secret'
+cp deploy/dev/backend.env.example .env
+set -a
+source .env
+set +a
 uvicorn app.main:app --reload
 ```
 
 서버를 실행하면 DB 파일은 `data/store_expiration_tracker.db`에 자동 생성된다.
 API 문서는 [http://localhost:8000/docs](http://localhost:8000/docs)에서 확인할 수 있다.
+로컬 기본 실행 설정은 `APP_ENV=development`, `SESSION_COOKIE_SECURE=false`이다.
 
 현재 로컬 실행에도 아래 접근 제어 기준을 반영한다.
 
@@ -27,6 +30,7 @@ API 문서는 [http://localhost:8000/docs](http://localhost:8000/docs)에서 확
 - 운영자 계정은 초기 seed 또는 직접 주입으로 생성한다.
 - `GET /health`를 제외한 운영 API는 로그인 뒤에만 접근 가능하게 둔다.
 - `ADMIN_PASSWORD`, `SESSION_SECRET` 환경변수는 서버 시작 전에 반드시 주입한다.
+- 로컬 개발에서는 `SESSION_COOKIE_SECURE=false`, production에서는 `SESSION_COOKIE_SECURE=true`를 기준으로 둔다.
 - 초기 세션은 로그인 시점부터 최대 `4시간` 동안만 유효한 고정 만료를 둔다.
 - 인증 쿠키는 영구 저장하지 않는 세션 쿠키를 둔다.
 - 브라우저 종료는 세션을 끝낼 수 있는 추가 조건으로 보고, 보안 기준 자체는 `4시간` 고정 만료에 둔다.
@@ -52,6 +56,7 @@ npm run dev
 Vue 개발 서버 기본 주소는 [http://localhost:5173](http://localhost:5173)이다.
 프론트 API 주소는 `VITE_API_BASE_URL`로 명시하며, 로컬 개발 기본값은 `/api`이다.
 로컬 개발 편의를 위해 백엔드에는 `5173` 기준 CORS를 열어둔다.
+이 allowlist는 `CORS_ALLOW_ORIGINS`로 조정할 수 있다.
 
 ## 빠른 확인 순서
 

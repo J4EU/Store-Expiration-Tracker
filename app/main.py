@@ -34,6 +34,7 @@ from app.schemas import (
     ProductSummary,
     ProductUpdate,
 )
+from app.settings import get_runtime_settings
 
 DEFAULT_CATEGORY = "미선택"
 ALLOWED_CATEGORIES = {DEFAULT_CATEGORY, "유제품"}
@@ -134,23 +135,24 @@ async def lifespan(_: FastAPI):
     yield
 
 
+runtime_settings = get_runtime_settings()
+
 app = FastAPI(
     title="Store Expiration Tracker API",
     version="0.1.0",
     lifespan=lifespan,
+    docs_url="/docs" if runtime_settings.api_docs_enabled else None,
+    redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
+    openapi_url="/openapi.json" if runtime_settings.api_docs_enabled else None,
 )
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:4173",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if runtime_settings.cors_allow_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(runtime_settings.cors_allow_origins),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 @app.get("/health", response_model=HealthResponse)
