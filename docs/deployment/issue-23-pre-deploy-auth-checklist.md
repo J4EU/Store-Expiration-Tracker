@@ -46,11 +46,12 @@ Issue #23은 새 정책을 정하지 않는다.
 - FastAPI는 외부에 직접 노출하지 않는다.
 - production에서는 same origin 기준으로 개발용 CORS allowlist를 그대로 사용하지 않는다.
 - production의 `SESSION_COOKIE_SECURE`는 `true`로 둔다.
+- production의 `API_DOCS_ENABLED`는 `false`로 둔다.
 
 ### Issue #22 기준
 
 - production 공개 엔드포인트는 `GET /health`만 둔다.
-- production에서 `/docs`, `/openapi.json`은 닫는다.
+- production에서 `/docs`, `/openapi.json`, `/redoc`은 닫는다.
 - `GET /health` 응답에는 내부 설정, DB 경로, secret, 상세 인프라 정보를 넣지 않는다.
 - production secret은 `ADMIN_PASSWORD`, `SESSION_SECRET`으로 둔다.
 - secret은 Git, 문서, 로그에 원문으로 남기지 않는다.
@@ -62,6 +63,7 @@ Issue #23은 새 정책을 정하지 않는다.
 
 - production 빌드에서 `VITE_API_BASE_URL=/api`가 반영되는지 확인한다.
 - production에서 `SESSION_COOKIE_SECURE=true`가 적용되는지 확인한다.
+- production에서 `API_DOCS_ENABLED=false`가 적용되는지 확인한다.
 - `ADMIN_PASSWORD`, `SESSION_SECRET`이 누락되지 않았는지 확인한다.
 - secret 원문이 Git, 문서, 로그에 남지 않는지 확인한다.
 - production 환경변수 주입이 수동 `export`에 의존하지 않는지 확인한다.
@@ -152,13 +154,11 @@ README에는 `배포 전 확인` 섹션을 두어 Runbook 진입점을 노출한
 - `docs/deployment/issue-23-pre-deploy-auth-checklist.md`는 검증 기준과 범위를 정리하는 결정 문서로 둔다.
 - README에는 배포 전 확인 진입점을 둔다.
 - 체크리스트 실패 항목은 그 자리에서 임의 수정하지 않고, 배포 작업 또는 후속 이슈로 책임을 분리한다.
-- 이번 이슈는 검증 절차를 정리하는 문서 작업이며, production 설정 구현은 후속 배포 작업으로 넘긴다.
+- 이번 이슈는 검증 절차를 정리하는 문서 작업이며, production 설정 구현은 Issue #33 같은 후속 설정 작업에서 다룬다.
 
 ## 다음 반영 후보
 
 - 실제 1차 배포 이슈에서 Runbook을 기준으로 검증 기록 남기기
 - Docker Compose 기반 1차 배포 Runbook 작성하기
 - production 환경변수 주입 방식 결정하기
-- production에서 `/docs`, `/openapi.json` 비활성화하기
-- `SESSION_COOKIE_SECURE` 환경변수 반영하기
-- 프론트 API base URL을 `VITE_API_BASE_URL` 기준으로 정리하기
+- Issue #33에서 반영한 `SESSION_COOKIE_SECURE`, `API_DOCS_ENABLED`, CORS 설정을 실제 배포 환경에서 검증하기

@@ -128,9 +128,10 @@ CORS는 이번 이슈의 독립 목표가 아니다.
 
 ```text
 development:
-CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+CORS_ALLOW_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
 
 production:
+CORS_ALLOW_ORIGINS=
 same origin 기준이므로 개발용 CORS allowlist를 사용하지 않는다.
 ```
 
@@ -175,6 +176,9 @@ SESSION_COOKIE_SECURE=true
 로컬 개발에서는 `.env` 파일을 기준으로 반복 실행 가능한 환경을 만든다.
 production에서는 새 셸마다 `export`로 직접 주입하지 않고, 재시작/재배포 후에도 같은 값을 재현할 수 있는 환경변수 주입 방식을 사용한다.
 
+repo에는 실제 값 대신 `deploy/dev/backend.env.example`, `deploy/prod/backend.env.example` 예시 파일만 둔다.
+로컬 개발에서는 dev example을 `.env`로 복사해 사용하고, production 실제 값은 Git에 커밋하지 않는다.
+
 현재 1차 후보는 Docker Compose의 `env_file` 또는 `environment` 설정이다.
 다만 Docker Compose의 환경변수 주입 방식과 노출 범위는 아직 학습과 검토가 필요하다.
 따라서 이번 이슈에서는 `수동 export를 표준 실행 방식으로 사용하지 않는다`와 `production 설정은 재현 가능한 방식으로 주입한다`까지만 고정한다.
@@ -183,9 +187,10 @@ production에서는 새 셸마다 `export`로 직접 주입하지 않고, 재시
 
 ```text
 local development:
-.env
+deploy/dev/backend.env.example -> .env
 
 production:
+deploy/prod/backend.env.example을 기준으로 실제 값은 Git 밖에서 주입
 재현 가능한 환경변수 주입 방식 사용
 Docker Compose env_file 또는 environment는 1차 후보
 ```
@@ -206,7 +211,8 @@ APP_ENV=development
 ADMIN_PASSWORD=...
 SESSION_SECRET=...
 SESSION_COOKIE_SECURE=false
-CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+CORS_ALLOW_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
+API_DOCS_ENABLED=true
 ```
 
 ```text
@@ -215,10 +221,13 @@ APP_ENV=production
 ADMIN_PASSWORD=...
 SESSION_SECRET=...
 SESSION_COOKIE_SECURE=true
+CORS_ALLOW_ORIGINS=
+API_DOCS_ENABLED=false
 ```
 
 production에서는 same origin 기준이므로 개발용 CORS allowlist를 그대로 사용하지 않는다.
-구체적으로 `CORS_ALLOW_ORIGINS`를 비워둘지, CORS middleware를 환경별로 조건부 적용할지는 구현 단계에서 정한다.
+Issue #33 구현에서는 `CORS_ALLOW_ORIGINS`가 비어 있으면 CORS middleware를 추가하지 않는 방식으로 정리한다.
+`API_DOCS_ENABLED=false`이면 FastAPI `/docs`, `/openapi.json`, `/redoc`을 열지 않는다.
 
 ### Frontend
 
@@ -251,7 +260,7 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 ### 3. 코드는 환경을 추론하지 않고 환경변수 값을 따른다
 
 프론트는 `VITE_API_BASE_URL`만 사용한다.
-백엔드는 `CORS_ALLOW_ORIGINS`, `SESSION_COOKIE_SECURE` 같은 환경변수로 개발/배포 차이를 나눈다.
+백엔드는 `APP_ENV`, `CORS_ALLOW_ORIGINS`, `SESSION_COOKIE_SECURE`, `API_DOCS_ENABLED` 같은 환경변수로 개발/배포 차이를 나눈다.
 
 ### 4. 수동 `export`는 표준 실행 방식에서 제외한다
 
@@ -279,8 +288,11 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - production에서는 same origin 기준으로 개발용 CORS allowlist를 사용하지 않는다.
 - development의 `SESSION_COOKIE_SECURE`는 `false`로 둔다.
 - production의 `SESSION_COOKIE_SECURE`는 `true`로 둔다.
+- development에서는 `API_DOCS_ENABLED=true`로 API 문서를 연다.
+- production에서는 `API_DOCS_ENABLED=false`로 `/docs`, `/openapi.json`, `/redoc`을 닫는다.
 - 수동 `export`는 로컬/배포 표준 실행 방식으로 사용하지 않는다.
 - 로컬은 `.env`를 기준으로 둔다.
+- repo에는 `deploy/dev/backend.env.example`, `deploy/prod/backend.env.example`만 두고 실제 값은 커밋하지 않는다.
 - production은 수동 `export`가 아니라 반복 가능한 환경변수 주입 방식을 사용한다.
 - Docker Compose의 `env_file` 또는 `environment` 설정은 production 환경변수 주입의 1차 후보로 둔다.
 - 구체적인 Docker Compose 주입 방식은 학습과 배포 아키텍처 검토 후 확정한다.
@@ -290,7 +302,8 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 
 - 반영됨: 프론트 API base URL을 `VITE_API_BASE_URL` 기준으로 변경하기
 - 반영됨: 로컬 `frontend/.env.example` 작성하기
-- 백엔드 CORS allowlist를 환경변수 기반으로 변경하기
-- 쿠키 `secure` 설정을 `SESSION_COOKIE_SECURE` 기준으로 변경하기
-- production 환경변수 주입 예시와 Git 제외 규칙 정리하기
+- 반영됨: 백엔드 CORS allowlist를 환경변수 기반으로 변경하기
+- 반영됨: 쿠키 `secure` 설정을 `SESSION_COOKIE_SECURE` 기준으로 변경하기
+- 반영됨: production API 문서 공개 여부를 `API_DOCS_ENABLED` 기준으로 변경하기
+- 반영됨: backend dev/prod 환경변수 예시 파일 정리하기
 - Docker Compose env 주입 방식 학습 및 배포 설정에 반영하기

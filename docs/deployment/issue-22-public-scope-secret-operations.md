@@ -9,7 +9,7 @@
 
 특히 아래 질문에 대한 현재 결론과 후속 배포 설계로 넘길 범위를 고정한다.
 
-- production에서 `/docs`, `/openapi.json`을 공개할 것인가
+- production에서 `/docs`, `/openapi.json`, `/redoc`을 공개할 것인가
 - `GET /health` 외에 인증 없이 열어둘 엔드포인트가 필요한가
 - 현재 repo에서 secret으로 취급할 값은 무엇인가
 - secret과 일반 환경 설정값을 어떻게 구분할 것인가
@@ -45,12 +45,13 @@ Issue #21에서는 로컬/배포 연결 설정과 환경변수 주입 원칙을 
 
 ## 이번 검토에서 다시 고정한 기준
 
-### 1. Production에서는 `/docs`, `/openapi.json`을 닫는다
+### 1. Production에서는 `/docs`, `/openapi.json`, `/redoc`을 닫는다
 
 `/docs`는 사람이 브라우저에서 보는 API 문서 UI다.
 `/openapi.json`은 API 문서 UI와 도구가 읽는 OpenAPI 명세 JSON이다.
+`/redoc`도 같은 OpenAPI 명세를 렌더링하는 문서 UI다.
 
-이 둘은 DB 데이터를 직접 노출하지는 않는다.
+이 문서 경로들은 DB 데이터를 직접 노출하지는 않는다.
 하지만 운영 배포에서 열려 있으면 현재 서버가 가진 API 경로, 요청 schema, 응답 schema가 외부에 드러난다.
 
 현재 서비스는 아래 성격을 가진다.
@@ -61,16 +62,18 @@ Issue #21에서는 로컬/배포 연결 설정과 환경변수 주입 원칙을 
 - 외부 회원가입 없음
 
 따라서 production에서 API 문서를 공개할 필요가 크지 않다.
-개발 편의는 local/development에서만 유지하고, production에서는 `/docs`와 `/openapi.json`을 닫는 기준으로 둔다.
+개발 편의는 local/development에서만 유지하고, production에서는 `/docs`, `/openapi.json`, `/redoc`을 닫는 기준으로 둔다.
 
 ```text
 development:
 /docs 공개
 /openapi.json 공개
+/redoc 공개
 
 production:
 /docs 비공개
 /openapi.json 비공개
+/redoc 비공개
 ```
 
 ### 2. 공개 엔드포인트는 `GET /health`만 둔다
@@ -111,8 +114,9 @@ SESSION_SECRET
 ```text
 PORT=8000
 VITE_API_BASE_URL=/api
-CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
-SESSION_COOKIE_SECURE=true
+CORS_ALLOW_ORIGINS=...
+SESSION_COOKIE_SECURE=true 또는 false
+API_DOCS_ENABLED=true 또는 false
 ```
 
 이 값들이 노출된다고 해서 곧바로 인증 우회나 세션 위조가 가능한 것은 아니다.
@@ -283,7 +287,7 @@ production 공개 범위와 secret 운영 기준을 정한다.
 ### 1. Production 공개 엔드포인트는 `GET /health`만 둔다
 
 production에서 인증 없이 열어둘 경로는 `GET /health`로 한정한다.
-`/docs`, `/openapi.json`은 local/development 편의로만 열고 production에서는 닫는다.
+`/docs`, `/openapi.json`, `/redoc`은 local/development 편의로만 열고 production에서는 닫는다.
 그 외 운영 API와 인증 API는 로그인 뒤에 둔다.
 
 ### 2. Secret은 `ADMIN_PASSWORD`, `SESSION_SECRET`이다
@@ -305,7 +309,7 @@ secret 저장/주입 방식은 이번 이슈에서 확정하지 않고, 실제 �
 
 ## 이번 결정으로 정리되는 규칙
 
-- production에서 `/docs`, `/openapi.json`은 닫는다.
+- production에서 `/docs`, `/openapi.json`, `/redoc`은 닫는다.
 - production 공개 엔드포인트는 `GET /health`만 둔다.
 - `GET /health` 응답에는 내부 설정, DB 경로, secret, 상세 인프라 정보를 넣지 않는다.
 - 현재 production secret은 `ADMIN_PASSWORD`, `SESSION_SECRET`이다.
@@ -327,7 +331,6 @@ secret 저장/주입 방식은 이번 이슈에서 확정하지 않고, 실제 �
 
 ## 다음 반영 후보
 
-- production에서 FastAPI `/docs`, `/openapi.json`을 비활성화하기
-- production 공개 범위 검증을 Issue #23 배포 전 인증 검증 체크리스트에 반영하기
+- production 공개 범위 검증을 Issue #23 배포 전 인증 검증 체크리스트와 Runbook으로 실행하기
 - 실제 배포 설계 이슈에서 secret 저장/주입 방식을 결정하기
 - Docker Compose `env_file`과 서버 `.env`의 차이를 학습한 뒤 1차 배포 구조에 반영하기
