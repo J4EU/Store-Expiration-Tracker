@@ -38,6 +38,10 @@
   - 기대 결과: HTTPS 배포 환경에서 인증 쿠키가 `Secure` 조건으로 발급된다.
   - 결과:
 
+- [ ] production의 `API_DOCS_ENABLED`가 `false`인지 확인한다.
+  - 기대 결과: FastAPI 문서 UI와 OpenAPI 명세가 production에서 공개되지 않는다.
+  - 결과:
+
 - [ ] production secret이 Git, 문서, 로그에 원문으로 남지 않는지 확인한다.
   - 기대 결과: `ADMIN_PASSWORD`, `SESSION_SECRET` 실제 값이 repo와 로그에 노출되지 않는다.
   - 결과:
@@ -88,6 +92,18 @@ curl -i https://example.com/openapi.json
 기대 결과:
 
 - 외부에서 OpenAPI 명세를 볼 수 없다.
+
+결과:
+
+- [ ] production에서 `/redoc`이 공개되지 않는지 확인한다.
+
+```bash
+curl -i https://example.com/redoc
+```
+
+기대 결과:
+
+- 외부에서 ReDoc 문서 UI를 볼 수 없다.
 
 결과:
 

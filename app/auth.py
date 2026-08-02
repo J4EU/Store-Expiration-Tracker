@@ -12,6 +12,8 @@ from functools import lru_cache
 
 from fastapi import HTTPException, Request, Response, status
 
+from app.settings import get_runtime_settings
+
 
 ADMIN_USERNAME = "admin"
 SESSION_COOKIE_NAME = "store_expiration_session"
@@ -22,6 +24,7 @@ SESSION_DURATION = timedelta(hours=4)
 class AuthSettings:
     admin_password: str
     session_secret: str
+    session_cookie_secure: bool
     admin_username: str = ADMIN_USERNAME
 
 
@@ -50,6 +53,7 @@ def get_settings() -> AuthSettings:
     return AuthSettings(
         admin_password=admin_password,
         session_secret=session_secret,
+        session_cookie_secure=get_runtime_settings().session_cookie_secure,
     )
 
 
@@ -246,7 +250,7 @@ def set_session_cookie(
         value=token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.session_cookie_secure,
         path="/",
     )
     return AuthSession(username=username, expires_at=expires_at)
@@ -257,7 +261,7 @@ def clear_session_cookie(response: Response) -> None:
         key=SESSION_COOKIE_NAME,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=get_runtime_settings().session_cookie_secure,
         path="/",
     )
 

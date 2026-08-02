@@ -408,9 +408,9 @@
 
 ### 다음 단계 후보
 
-1. 배포용 `secure` 쿠키와 도메인/호스트 설정 정리
-2. 배포 환경 CORS와 프론트 API 주소 분리
-3. production `/docs`, `/openapi.json` 비활성화 반영
+1. 실제 배포 환경에서 `SESSION_COOKIE_SECURE=true` 동작 검증
+2. production same-origin `/api` reverse proxy와 CORS 동작 검증
+3. production `/docs`, `/openapi.json`, `/redoc` 비공개 검증
 4. 서버 저장 세션 전환 필요성 검토
 
 ## 7. 1차에서 보류하는 API
