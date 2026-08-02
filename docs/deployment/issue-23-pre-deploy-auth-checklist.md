@@ -162,3 +162,10 @@ README에는 `배포 전 확인` 섹션을 두어 Runbook 진입점을 노출한
 - Docker Compose 기반 1차 배포 Runbook 작성하기
 - production 환경변수 주입 방식 결정하기
 - Issue #33에서 반영한 `SESSION_COOKIE_SECURE`, `API_DOCS_ENABLED`, CORS 설정을 실제 배포 환경에서 검증하기
+
+## 후속 반영 현황
+
+2026-08-02 기준, Issue #33에서 `SESSION_COOKIE_SECURE`, `CORS_ALLOW_ORIGINS`, `API_DOCS_ENABLED` 설정과 backend dev/prod 환경변수 예시를 repo에 반영했다.
+Runbook에는 `API_DOCS_ENABLED=false`와 `/redoc` 비공개 확인 항목을 추가했다.
+
+이 설정들이 실제 production 환경에서 동작하는지 확인하고 결과를 기록하는 일은 Issue #27에서 수행한다.

@@ -334,3 +334,10 @@ secret 저장/주입 방식은 이번 이슈에서 확정하지 않고, 실제 �
 - production 공개 범위 검증을 Issue #23 배포 전 인증 검증 체크리스트와 Runbook으로 실행하기
 - 실제 배포 설계 이슈에서 secret 저장/주입 방식을 결정하기
 - Docker Compose `env_file`과 서버 `.env`의 차이를 학습한 뒤 1차 배포 구조에 반영하기
+
+## 후속 반영 현황
+
+2026-08-02 기준, Issue #33에서 `API_DOCS_ENABLED` 설정을 추가해 production 설정일 때 FastAPI 문서 경로를 비공개로 둘 수 있게 했다.
+구현은 `/docs`, `/openapi.json`, `/redoc`을 함께 제어한다.
+
+실제 production URL에서의 비공개 여부 확인과 공개 범위 검증은 Issue #27의 배포 검증에서 수행한다.

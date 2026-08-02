@@ -307,3 +307,14 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - 반영됨: production API 문서 공개 여부를 `API_DOCS_ENABLED` 기준으로 변경하기
 - 반영됨: backend dev/prod 환경변수 예시 파일 정리하기
 - Docker Compose env 주입 방식 학습 및 배포 설정에 반영하기
+
+## 후속 반영 현황
+
+2026-08-02 기준, Issue #33에서 아래 설정을 repo에 반영했다.
+
+- `CORS_ALLOW_ORIGINS` 환경변수 기반 CORS 설정
+- `SESSION_COOKIE_SECURE` 환경변수 기반 쿠키 `Secure` 설정
+- `API_DOCS_ENABLED` 환경변수 기반 API 문서 공개 여부 제어
+- `deploy/dev/backend.env.example`, `deploy/prod/backend.env.example` 환경변수 예시 파일
+
+실제 production 환경에서의 reverse proxy, HTTPS, 쿠키, CORS 동작 검증과 Runbook 결과 기록은 Issue #27에서 수행한다.
