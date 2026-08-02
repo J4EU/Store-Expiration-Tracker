@@ -34,8 +34,8 @@
 
 ## 이슈가 열린 이유
 
-Issue #20에서는 signed session cookie 방식과 배포 쿠키 기준을 정리했다.
-Issue #21에서는 로컬/배포 연결 설정과 환경변수 주입 원칙을 정리했다.
+[Issue #20 Review](issue-20-deployment-auth-session-policy.md)에서는 signed session cookie 방식과 배포 쿠키 기준을 정리했다.
+[Issue #21 Review](issue-21-env-config-separation.md)에서는 로컬/배포 연결 설정과 환경변수 주입 원칙을 정리했다.
 
 하지만 실제 운영 배포에서는 설정 항목을 나누는 것만으로는 충분하지 않다.
 어떤 경로를 공개로 남길지, 어떤 값이 secret인지, secret을 누가 보고 바꿀 수 있는지, 변경이 세션에 어떤 영향을 주는지도 함께 설명할 수 있어야 한다.
@@ -130,7 +130,7 @@ sensitive config는 secret은 아니지만 공개 문서에 실제 값을 박제
 production secret은 아래 위치에 원문으로 남기지 않는다.
 
 - Git commit
-- README와 docs 문서
+- [Documentation](../README.md)와 관련 docs 문서
 - issue와 PR 본문
 - application log
 - access log
@@ -262,15 +262,15 @@ production secret 저장/주입 방식은 이번 이슈에서 확정하지 않�
 현재 1차 후보는 서버 `.env` 또는 Docker Compose `env_file`이다.
 하지만 Docker Compose의 실제 환경변수 주입 방식은 배포 구조와 함께 학습 및 결정한다.
 
-## Issue #21과의 범위 구분
+## [Issue #21 Review](issue-21-env-config-separation.md)과의 범위 구분
 
-Issue #21은 로컬과 production에서 달라지는 설정 주입 구조를 정리한다.
+[Issue #21 Review](issue-21-env-config-separation.md)은 로컬과 production에서 달라지는 설정 주입 구조를 정리한다.
 Issue #22는 그 설정 중 secret의 운영 책임과 공개 범위 기준을 정리한다.
 
 따라서 두 이슈의 경계는 아래와 같다.
 
 ```text
-Issue #21:
+[Issue #21 Review](issue-21-env-config-separation.md):
 환경별 설정 항목을 나누고, 수동 export를 표준 실행 방식에서 제외한다.
 
 Issue #22:
@@ -278,7 +278,7 @@ production 공개 범위와 secret 운영 기준을 정한다.
 구체적인 secret 저장/주입 기술은 후속 배포 설계로 넘긴다.
 ```
 
-이 기준은 Issue #21과 충돌하지 않는다.
+이 기준은 [Issue #21 Review](issue-21-env-config-separation.md)과 충돌하지 않는다.
 #21에서 Docker Compose `env_file` 또는 `environment`를 1차 후보로 둔 것은 주입 구조 후보를 정리한 것이고, #22에서는 그 후보를 확정하지 않는다.
 #22는 어떤 후보를 선택하더라도 지켜야 할 secret 관리 기준만 고정한다.
 
@@ -327,11 +327,11 @@ secret 저장/주입 방식은 이번 이슈에서 확정하지 않고, 실제 �
 - 사고 대응은 일반 secret 변경, secret 노출 의심, EC2 침해 의심으로 나눈다.
 - secret 저장/주입 방식은 이번 이슈에서 확정하지 않고 후속 배포 설계 이슈에서 결정한다.
 - 현재 1차 후보는 서버 `.env` 또는 Docker Compose `env_file`이다.
-- Issue #21과 #22는 각각 환경변수 주입 구조와 secret 운영 기준으로 역할을 나눈다.
+- [Issue #21 Review](issue-21-env-config-separation.md)과 Issue #22는 각각 환경변수 주입 구조와 secret 운영 기준으로 역할을 나눈다.
 
 ## 다음 반영 후보
 
-- production 공개 범위 검증을 Issue #23 배포 전 인증 검증 체크리스트와 Runbook으로 실행하기
+- production 공개 범위 검증을 [Issue #23 Review](issue-23-pre-deploy-auth-checklist.md)와 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md)으로 실행하기
 - 실제 배포 설계 이슈에서 secret 저장/주입 방식을 결정하기
 - Docker Compose `env_file`과 서버 `.env`의 차이를 학습한 뒤 1차 배포 구조에 반영하기
 

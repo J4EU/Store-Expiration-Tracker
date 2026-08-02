@@ -18,7 +18,7 @@
 ## 관련 이슈
 
 - GitHub Issue: `#21 로컬/배포 환경변수 기반 연결 설정 분리`
-- 선행 문서: `docs/deployment/issue-20-deployment-auth-session-policy.md`
+- 선행 문서: [Issue #20 Review: 배포용 인증/세션 설정 정리](issue-20-deployment-auth-session-policy.md)
 
 ## 현재 구현 상태
 
@@ -142,7 +142,7 @@ production에서 프론트와 API가 같은 origin 아래에 있으면, 브라�
 
 ### 5. 쿠키 `secure` 설정은 환경변수로 분리한다
 
-Issue #20에서는 production 쿠키 기준을 `HttpOnly + Secure + SameSite=Lax`로 정리했다.
+[Issue #20 Review](issue-20-deployment-auth-session-policy.md)에서는 production 쿠키 기준을 `HttpOnly + Secure + SameSite=Lax`로 정리했다.
 하지만 현재 로컬 개발은 HTTP로 실행되므로 `secure=True`를 바로 적용하면 로컬 쿠키 전송이 깨질 수 있다.
 
 따라서 쿠키 `secure` 여부는 환경변수로 분리한다.
@@ -169,7 +169,7 @@ SESSION_COOKIE_SECURE=true
 - 어떤 값이 production 설정인지 추적하기 어렵다.
 - 반복 배포 절차로 설명하기 어렵다.
 
-따라서 README, quickstart, 배포 문서에서 새 셸마다 `export`를 직접 입력하는 방식을 기본 실행 절차로 안내하지 않는다.
+따라서 [Documentation](../README.md), [Backend Quickstart](../development/backend-quickstart.md), 배포 문서에서 새 셸마다 `export`를 직접 입력하는 방식을 기본 실행 절차로 안내하지 않는다.
 
 ### 7. 로컬은 `.env`, production은 반복 가능한 환경변수 주입 방식을 기준으로 둔다
 
@@ -199,7 +199,7 @@ Docker Compose의 `env_file`을 사용하더라도, 그것은 비밀값을 암�
 컨테이너 실행 시 환경변수를 재현 가능하게 주입하기 위한 수단에 가깝다.
 
 따라서 실제 production 값은 Git에 커밋하지 않는다.
-구체적인 보관 위치, 파일 권한, 서버 접근 권한, 비밀값 회전 기준은 Issue #22와 후속 배포 아키텍처 검토에서 별도로 정리한다.
+구체적인 보관 위치, 파일 권한, 서버 접근 권한, 비밀값 회전 기준은 [Issue #22 Review: 운영 배포 공개 범위와 비밀값 운영 기준 정리](issue-22-public-scope-secret-operations.md)와 후속 배포 아키텍처 검토에서 별도로 정리한다.
 
 ## 환경변수 후보
 
@@ -265,7 +265,7 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 ### 4. 수동 `export`는 표준 실행 방식에서 제외한다
 
 로컬은 `.env`, production은 수동 `export`가 아닌 반복 가능한 환경변수 주입 방식을 기준으로 둔다.
-실제 비밀값은 Git에 커밋하지 않고, production secret 운영 기준은 Issue #22에서 별도로 다룬다.
+실제 비밀값은 Git에 커밋하지 않고, production secret 운영 기준은 [Issue #22 Review](issue-22-public-scope-secret-operations.md)에서 별도로 다룬다.
 
 ## 이번 결정으로 정리되는 규칙
 
@@ -283,7 +283,7 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - production의 `VITE_API_BASE_URL`은 `/api`로 둔다.
 - 현재 MVP의 공식 프론트 화면 URL은 `/` 하나로 둔다.
 - fallback으로 열린 정의되지 않은 프론트 경로는 앱 부팅 시 `/`로 정규화한다.
-- SPA fallback과 routing 정책은 `docs/deployment/issue-28-spa-fallback-routing-policy.md`에서 다룬다.
+- SPA fallback과 routing 정책은 [Issue #28 SPA fallback and routing policy](issue-28-spa-fallback-routing-policy.md)에서 다룬다.
 - development CORS allowlist는 로컬 프론트 개발 서버 origin을 허용한다.
 - production에서는 same origin 기준으로 개발용 CORS allowlist를 사용하지 않는다.
 - development의 `SESSION_COOKIE_SECURE`는 `false`로 둔다.
@@ -317,4 +317,4 @@ Nginx의 실제 배치 방식은 후속 배포 아키텍처에서 확정한다.
 - `API_DOCS_ENABLED` 환경변수 기반 API 문서 공개 여부 제어
 - `deploy/dev/backend.env.example`, `deploy/prod/backend.env.example` 환경변수 예시 파일
 
-실제 production 환경에서의 reverse proxy, HTTPS, 쿠키, CORS 동작 검증과 Runbook 결과 기록은 Issue #27에서 수행한다.
+실제 production 환경에서의 reverse proxy, HTTPS, 쿠키, CORS 동작 검증과 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md) 결과 기록은 Issue #27에서 수행한다.

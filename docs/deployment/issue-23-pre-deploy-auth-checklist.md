@@ -5,7 +5,7 @@
 이 문서는 GitHub Issue `#23 배포 전 인증 검증 체크리스트 정리`를 현재 repo 기준으로 다시 정리한 결과를 담는다.
 
 이번 이슈의 핵심은 새 인증 기능을 추가하거나 배포 설정을 구현하는 것이 아니다.
-Issue #21과 Issue #22에서 정한 production 기준을 실제 배포 URL에서 반복 확인할 수 있도록, 배포 전 인증 검증 항목과 순서를 정리하는 것이 목적이다.
+[Issue #21 Review](issue-21-env-config-separation.md)와 [Issue #22 Review](issue-22-public-scope-secret-operations.md)에서 정한 production 기준을 실제 배포 URL에서 반복 확인할 수 있도록, 배포 전 인증 검증 항목과 순서를 정리하는 것이 목적이다.
 
 특히 아래 질문에 대한 체크리스트 기준을 남긴다.
 
@@ -35,9 +35,9 @@ Issue #21과 Issue #22에서 정한 production 기준을 실제 배포 URL에서
 ## 선행 기준
 
 Issue #23은 새 정책을 정하지 않는다.
-검증 기준은 Issue #21과 Issue #22에서 정한 내용을 따른다.
+검증 기준은 [Issue #21 Review](issue-21-env-config-separation.md)와 [Issue #22 Review](issue-22-public-scope-secret-operations.md)에서 정한 내용을 따른다.
 
-### Issue #21 기준
+### [Issue #21 Review](issue-21-env-config-separation.md) 기준
 
 - 1차 배포는 EC2 단일 서버 안에서 프론트와 API를 함께 운영하는 방향으로 본다.
 - production은 `same origin + /api reverse proxy` 기준으로 둔다.
@@ -48,7 +48,7 @@ Issue #23은 새 정책을 정하지 않는다.
 - production의 `SESSION_COOKIE_SECURE`는 `true`로 둔다.
 - production의 `API_DOCS_ENABLED`는 `false`로 둔다.
 
-### Issue #22 기준
+### [Issue #22 Review](issue-22-public-scope-secret-operations.md) 기준
 
 - production 공개 엔드포인트는 `GET /health`만 둔다.
 - production에서 `/docs`, `/openapi.json`, `/redoc`은 닫는다.
@@ -114,11 +114,7 @@ Issue #23은 새 정책을 정하지 않는다.
 ## Runbook으로 옮긴 실행 절차
 
 위 검증 항목은 실제 배포 때 기록 가능한 순서로 실행해야 한다.
-따라서 실행 절차와 결과 기록 칸은 별도 Runbook 초안에 둔다.
-
-```text
-docs/deployment/pre-deploy-auth-runbook.md
-```
+따라서 실행 절차와 결과 기록 칸은 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md)에 둔다.
 
 Runbook은 아래 역할을 가진다.
 
@@ -127,7 +123,7 @@ Runbook은 아래 역할을 가진다.
 - 브라우저에서 확인할 로그인, 세션, 쿠키 항목을 제공한다.
 - 실패 항목을 후속 이슈로 넘길 수 있게 기록 양식을 제공한다.
 
-README에는 `배포 전 확인` 섹션을 두어 Runbook 진입점을 노출한다.
+[Documentation](../README.md)에는 `배포 전 확인` 섹션을 두어 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md) 진입점을 노출한다.
 나중에 실제 1차 배포 이슈를 진행할 때도 첫 체크박스에서 이 Runbook을 확인한다.
 
 ## 이번 이슈에서 바로 하지 않을 것
@@ -148,11 +144,11 @@ README에는 `배포 전 확인` 섹션을 두어 Runbook 진입점을 노출한
 
 ## 이번 결정으로 정리되는 규칙
 
-- Issue #23은 Issue #21, Issue #22에서 정한 기준을 실제 배포 URL에서 확인하는 후속 검증 이슈다.
+- Issue #23은 [Issue #21 Review](issue-21-env-config-separation.md), [Issue #22 Review](issue-22-public-scope-secret-operations.md)에서 정한 기준을 실제 배포 URL에서 확인하는 후속 검증 이슈다.
 - 체크리스트는 production 설정, 공개 범위, reverse proxy, 로그인/세션, 보호 API, 쿠키, CORS 검증을 포함한다.
-- 실행 순서와 결과 기록 칸은 `docs/deployment/pre-deploy-auth-runbook.md`에 둔다.
-- `docs/deployment/issue-23-pre-deploy-auth-checklist.md`는 검증 기준과 범위를 정리하는 결정 문서로 둔다.
-- README에는 배포 전 확인 진입점을 둔다.
+- 실행 순서와 결과 기록 칸은 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md)에 둔다.
+- 이 문서는 검증 기준과 범위를 정리하는 결정 문서로 둔다.
+- [Documentation](../README.md)에는 배포 전 확인 진입점을 둔다.
 - 체크리스트 실패 항목은 그 자리에서 임의 수정하지 않고, 배포 작업 또는 후속 이슈로 책임을 분리한다.
 - 이번 이슈는 검증 절차를 정리하는 문서 작업이며, production 설정 구현은 Issue #33 같은 후속 설정 작업에서 다룬다.
 

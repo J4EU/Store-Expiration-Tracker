@@ -129,7 +129,7 @@ archive    -> URL이 아니라 currentView 상태
 - session cookie, secret, production `.env` 값이 노출되는 경우
 - production reverse proxy가 `/api` prefix를 의도와 다르게 전달하는 경우
 
-이 항목들은 production 배포 구조와 함께 Issue #27 및 배포 전 검증 흐름에서 확인한다.
+이 항목들은 production 배포 구조와 함께 Issue #27 및 [Issue #23 Review](issue-23-pre-deploy-auth-checklist.md)의 [배포 전 인증 검증 Runbook 초안](pre-deploy-auth-runbook.md)에서 확인한다.
 
 preview 환경에서 확인한 `/api` 호출은 production Nginx reverse proxy 검증을 대체하지 않는다.
 실제 `/api` prefix 제거와 FastAPI 직접 노출 차단은 배포 구조가 확정된 뒤 별도로 확인한다.

@@ -4,7 +4,7 @@
 
 이 문서는 `Store-Expiration-Tracker`의 초기 MVP 범위와 구현 원칙을 정의한다.
 
-기술 스택이나 상세 화면 설계보다, 제품이 우선 해결할 문제와 포함 범위를 명확히 하는 데 목적이 있다. 실제 등록 작업 이후 조정된 방향은 `docs/product/mvp-pivot.md`에서, 그 이후 확정된 설계 결론은 `docs/product/mvp-decisions.md`에서 별도로 다룬다.
+기술 스택이나 상세 화면 설계보다, 제품이 우선 해결할 문제와 포함 범위를 명확히 하는 데 목적이 있다. 실제 등록 작업 이후 조정된 방향은 [MVP 방향 전환](mvp-pivot.md)에서, 그 이후 확정된 설계 결론은 [MVP Decisions](mvp-decisions.md)에서 별도로 다룬다.
 
 ## 1. 해결하려는 문제
 

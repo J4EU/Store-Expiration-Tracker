@@ -4,7 +4,7 @@
 
 이 문서는 1차 운영 배포 전후에 인증 관련 동작을 실제 배포 URL 기준으로 확인하기 위한 Runbook 초안이다.
 
-체크리스트의 목적은 새 정책을 정하는 것이 아니라, Issue #21과 Issue #22에서 정한 production 기준이 실제 배포 환경에서 맞게 동작하는지 확인하는 것이다.
+체크리스트의 목적은 새 정책을 정하는 것이 아니라, [Issue #21 Review](issue-21-env-config-separation.md)와 [Issue #22 Review](issue-22-public-scope-secret-operations.md)에서 정한 production 기준이 실제 배포 환경에서 맞게 동작하는지 확인하는 것이다.
 
 ## 사용 시점
 

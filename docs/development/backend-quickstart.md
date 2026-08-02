@@ -78,8 +78,8 @@ Vue 개발 서버 기본 주소는 [http://localhost:5173](http://localhost:5173
 
 - 백엔드는 FastAPI 기반으로 구현한다.
 - 프론트엔드는 `frontend/`의 Vue 앱으로 별도 개발한다.
-- API 범위와 상태 규칙은 `docs/development/backend-implementation-guide.md`를 기준으로 맞춘다.
-- 프론트 화면 범위는 `docs/development/frontend-implementation-guide.md`를 기준으로 맞춘다.
+- API 범위와 상태 규칙은 [Backend Implementation Guide](backend-implementation-guide.md)를 기준으로 맞춘다.
+- 프론트 화면 범위는 [Frontend Implementation Guide](frontend-implementation-guide.md)를 기준으로 맞춘다.
 
 ## 현재 API
 
