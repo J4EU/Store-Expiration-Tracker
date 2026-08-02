@@ -41,3 +41,4 @@
 저장소 작업 흐름과 main 보호 정책을 다룹니다.
 
 - [Project Workflow](process/project-workflow.md)
+- [프로젝트 문서 역할 조사](process/document-role-inventory.md)
