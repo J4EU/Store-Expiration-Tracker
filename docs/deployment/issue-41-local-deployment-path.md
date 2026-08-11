@@ -83,9 +83,9 @@ Nginx는 `/api` prefix를 제거해 backend의 기존 `/health`, `/auth/login`, 
 ## 구현 결과
 
 - backend와 frontend 각각의 production 이미지를 구성했다.
-- Compose는 Nginx의 `8080:80`만 호스트에 공개하고, backend는 `expose: 8000`으로 내부 네트워크에서만 연결한다.
+- Compose는 Nginx의 `8080:80`만 호스트에 공개하고, backend에는 `ports`를 두지 않는다. 동일 Compose 기본 네트워크에서 Nginx가 `backend:8000`으로 연결한다.
 - `sqlite_data` named volume을 backend의 `/app/data`에 마운트했다.
-- 로컬 전용 환경변수 파일의 예시와 Git·Docker build context 제외 규칙을 준비했다.
+- `deploy/compose-local/backend.env.example` 예시를 두고, 실제 `deploy/compose-local/backend.env`는 `.gitignore`와 `.dockerignore`에 명시해 Git과 backend Docker build context에서 제외했다.
 - `/api`는 `/api/`로 정규화하고, `/api/...`는 prefix를 제거한 뒤 backend에 전달한다.
 
 ## 로컬 검증 결과
@@ -96,7 +96,7 @@ Nginx는 `/api` prefix를 제거해 backend의 기존 `/health`, `/auth/login`, 
 cp deploy/compose-local/backend.env.example deploy/compose-local/backend.env
 ```
 
-`deploy/compose-local/backend.env`에는 로컬 전용 `ADMIN_PASSWORD`와 `SESSION_SECRET`을 입력한다. 이 파일은 Git과 Docker build context에 포함하지 않는다.
+`deploy/compose-local/backend.env`에는 로컬 전용 `ADMIN_PASSWORD`와 `SESSION_SECRET`을 입력한다. 이 실제 파일은 `.gitignore`와 `.dockerignore`에 명시되어 Git과 backend Docker build context에 포함하지 않는다.
 
 ### 기동과 외부 진입점 — 통과
 
