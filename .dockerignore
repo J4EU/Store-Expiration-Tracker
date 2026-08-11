@@ -1,0 +1,10 @@
+.git
+.venv
+__pycache__
+*.pyc
+.env
+data
+frontend
+deploy/compose-local/backend.env
+docs
+tests

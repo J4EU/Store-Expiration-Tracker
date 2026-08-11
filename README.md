@@ -65,7 +65,11 @@ npm run dev
 
 현재 MVP는 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Issue #28 SPA fallback and routing policy](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/deployment/issue-28-spa-fallback-routing-policy.md)에 정리합니다.
 
-실제 `/api` reverse proxy 구현과 검증은 배포 구조 이슈에서 별도로 진행합니다.
+운영과 유사한 배포 경로의 구성과 로컬 검증은 [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](docs/deployment/issue-41-local-deployment-path.md)에 정리합니다.
+
+### 로컬 최소 배포 경로 구성 및 검증
+
+빠른 실제 운영 배포를 위해 frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결하고 로컬에서 실제 요청 경계를 검증합니다. 구조 결정과 구현·실행·보정 결과는 [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](docs/deployment/issue-41-local-deployment-path.md)에 함께 기록합니다.
 
 처음 확인할 때는 `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 순서로 보면 됩니다.
 

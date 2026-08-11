@@ -35,6 +35,7 @@
 - [Issue #22 Review: 운영 배포 공개 범위와 비밀값 운영 기준 정리](deployment/issue-22-public-scope-secret-operations.md)
 - [Issue #23 Review: 배포 전 인증 검증 체크리스트 정리](deployment/issue-23-pre-deploy-auth-checklist.md)
 - [Issue #28 SPA fallback and routing policy](deployment/issue-28-spa-fallback-routing-policy.md)
+- [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](deployment/issue-41-local-deployment-path.md)
 
 ## Process
 
