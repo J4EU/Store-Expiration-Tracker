@@ -1,7 +1,6 @@
 # EC2 Compose 검증 스파이크
 
-이 Terraform 구성은 EC2 한 대에서 현재 Docker Compose 경로를 직접 확인하는
-데 필요한 AWS 리소스만 만든다.
+이 Terraform 구성은 EC2 한 대에서 Docker Compose 구성을 검증하는 데 필요한 최소한의 AWS 리소스를 생성한다.
 
 생성하는 리소스는 아래와 같다.
 
@@ -10,15 +9,17 @@
 - `allowed_operator_cidr`에서만 SSH와 현재 Compose Nginx 포트(`8080`)를
   허용하는 보안 그룹 1개
 
-이번 단계에서는 설계 완성도보다 수동 운영 관찰을 우선한다. Terraform은
-EC2와 Security Group 생성에만 책임을 둔다. EC2와 수명 주기를 분리한 별도
-데이터 EBS와 Elastic IP는 만들지 않는다.
+이번 스파이크에서는 설계와 자동화를 구체화하기 전에, 실제 EC2 환경에서
+현재 Docker Compose 구성이 정상적으로 빌드·실행되는지 직접 확인하는 것을
+우선한다.
+
+따라서 Terraform은 EC2와 Security Group 생성에만 책임을 둔다. EC2와 수명 주기를 분리한 별도 데이터 EBS와 Elastic IP는 만들지 않는다.
 
 EC2 내부의 초기화, Docker 설치, 애플리케이션 배포는 `user_data`나 자동화에
 넣지 않고 SSH로 직접 수행한다. HTTPS와 CI/CD도 이번 스파이크 범위에
 포함하지 않는다.
 
-## apply 전에 할 일
+## 로컬 환경에서 apply 준비
 
 로컬 변수 파일을 만들고, 예시로 적힌 주소를 현재 사용 중인 공인 IPv4 주소로
 바꾼다.
@@ -27,8 +28,10 @@ EC2 내부의 초기화, Docker 설치, 애플리케이션 배포는 `user_data`
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-`terraform.tfvars`는 Git에서 제외된다. 사용할 기존 EC2 키 페어는 기본값으로
-`j4eu-ec2`를 사용한다.
+`terraform.tfvars`는 Git에서 제외된다.
+
+SSH 접속에 사용할 기존 EC2 키 페어 이름을 `key_pair_name`에 지정한다.
+기본값은 현재 프로젝트에서 사용하는 `j4eu-ec2`이다.
 
 ## 수동 Terraform 실행 흐름
 
