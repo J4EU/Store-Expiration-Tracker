@@ -17,10 +17,34 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_subnets" "default_vpc" {
+data "aws_ssm_parameter" "amazon_linux_2023" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+}
+
+locals {
+  subnet_id = sort(data.aws_subnets.data_volume_availability_zone.ids)[0]
+}
+
+data "aws_subnet" "deployment" {
+  id = local.subnet_id
+}
+
+data "aws_ebs_volume" "sqlite_data" {
+  filter {
+    name   = "volume-id"
+    values = [var.data_volume_id]
+  }
+}
+
+data "aws_subnets" "data_volume_availability_zone" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = [data.aws_ebs_volume.sqlite_data.availability_zone]
   }
 
   filter {
@@ -29,17 +53,9 @@ data "aws_subnets" "default_vpc" {
   }
 }
 
-data "aws_ssm_parameter" "amazon_linux_2023" {
-  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
-}
-
-locals {
-  subnet_id = sort(data.aws_subnets.default_vpc.ids)[0]
-}
-
-resource "aws_security_group" "compose_spike" {
-  name        = "${var.name_prefix}-compose-spike"
-  description = "Temporary SSH and Compose test access"
+resource "aws_security_group" "deployment" {
+  name        = "${var.name_prefix}-deployment"
+  description = "SSH and application access for the EC2 deployment host"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -51,7 +67,7 @@ resource "aws_security_group" "compose_spike" {
   }
 
   ingress {
-    description = "Temporary Nginx Compose test port from the operator"
+    description = "Nginx application access from the operator"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
@@ -67,16 +83,16 @@ resource "aws_security_group" "compose_spike" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-compose-spike-sg"
+    Name = "${var.name_prefix}-deployment-sg"
   }
 }
 
-resource "aws_instance" "compose_spike" {
+resource "aws_instance" "deployment" {
   ami                         = data.aws_ssm_parameter.amazon_linux_2023.value
   instance_type               = var.instance_type
   subnet_id                   = local.subnet_id
   key_name                    = var.key_pair_name
-  vpc_security_group_ids      = [aws_security_group.compose_spike.id]
+  vpc_security_group_ids      = [aws_security_group.deployment.id]
   associate_public_ip_address = true
 
   root_block_device {
@@ -86,6 +102,12 @@ resource "aws_instance" "compose_spike" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-compose-spike"
+    Name = "${var.name_prefix}-deployment"
   }
+}
+
+resource "aws_volume_attachment" "sqlite_data" {
+  device_name = "/dev/sdf"
+  instance_id = aws_instance.deployment.id
+  volume_id   = data.aws_ebs_volume.sqlite_data.id
 }

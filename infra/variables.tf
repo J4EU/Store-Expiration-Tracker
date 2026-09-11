@@ -17,9 +17,14 @@ variable "key_pair_name" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type for the Compose verification host."
+  description = "EC2 instance type for the deployment host."
   type        = string
   default     = "t3.micro"
+}
+
+variable "data_volume_id" {
+  description = "Existing Data EBS volume ID managed by the data-ebs layer."
+  type        = string
 }
 
 variable "allowed_operator_cidr" {

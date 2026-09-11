@@ -1,0 +1,6 @@
+services:
+  backend:
+    volumes:
+      - type: bind
+        source: /srv/store-expiration-tracker/data
+        target: /app/data
