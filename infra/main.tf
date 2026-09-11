@@ -101,6 +101,8 @@ resource "aws_instance" "deployment" {
     delete_on_termination = true
   }
 
+  user_data = file("${path.module}/scripts/prepare-data-ebs.sh")
+
   tags = {
     Name = "${var.name_prefix}-deployment"
   }
