@@ -1,8 +1,19 @@
 # EC2 배포 인프라
 
 이 디렉터리는 Store Expiration Tracker를 EC2에서 실행하기 위한 AWS 리소스를
-Terraform으로 관리한다. 현재 구성은 실행 환경을 담는 EC2 레이어와 SQLite 데이터를
-보관하는 Data EBS 레이어의 state를 분리한다.
+Terraform으로 관리한다. 구성은 아래 두 레이어로 나뉜다.
+
+```text
+infra/data-ebs/ (Data EBS state) -- data_volume_id --> infra/ (EC2 state)
+                                                        └─ EC2에 Data EBS 연결
+```
+
+- `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS만 생성하고 보존한다.
+- 이 디렉터리의 상위 `infra` 레이어는 EC2·보안 그룹·Data EBS를 EC2에 연결하는
+  attachment를 관리한다. Data EBS는 새로 만들지 않고 `data_volume_id`로 조회한다.
+
+따라서 EC2를 교체해도 같은 Data EBS를 다시 연결할 수 있고, 두 레이어의 Terraform
+state도 분리된다.
 
 EC2 내부의 Docker 설치와 애플리케이션 배포는 운영자가 직접 수행한다. Data EBS의
 파일시스템 생성과 마운트는 EC2 `user_data`가 담당한다. Terraform은 AWS 리소스 관계와
@@ -17,10 +28,13 @@ Terraform은 이를 그대로 EC2에 전달한다.
 - `allowed_operator_cidr`에만 SSH(`22`)와 Nginx(`8080`)를 허용하는 보안 그룹
 - `data-ebs` 레이어에서 생성하는 20GB `gp3` Data EBS 1개
 
-| 구분 | 저장 대상 | 수명 주기 |
-| --- | --- | --- |
+이 구성은 선택한 AWS 리전에 default VPC와 default subnet이 있고, `key_pair_name`에
+지정한 EC2 키 페어가 이미 존재한다는 전제를 둔다.
+
+| 구분     | 저장 대상                | 수명 주기             |
+| -------- | ------------------------ | --------------------- |
 | Root EBS | OS, Docker, 애플리케이션 | EC2 종료 시 함께 삭제 |
-| Data EBS | SQLite 서비스 데이터 | EC2와 분리해 보존 |
+| Data EBS | SQLite 서비스 데이터     | EC2와 분리해 보존     |
 
 Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 `data-ebs`의 별도 state에서 `prevent_destroy`로 관리하고, 이 디렉터리는 Data EBS를
@@ -33,7 +47,8 @@ Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 
 ## 적용 준비
 
-Data EBS를 먼저 만들고, 출력된 볼륨 ID를 EC2 레이어의 변수로 전달한다.
+아래 명령은 이 README가 있는 `infra/` 디렉터리에서 실행한다. 처음 구성할 때는
+EC2 레이어가 연결할 대상이 먼저 필요하므로 Data EBS를 먼저 만든다.
 
 ```bash
 cd data-ebs
@@ -42,8 +57,15 @@ terraform init
 terraform apply
 ```
 
-`data_volume_id` 출력값을 확인한 뒤, 상위 디렉터리의
-`terraform.tfvars.example`을 복사해 현재 공인 IPv4 주소와 그 ID를 입력한다.
+apply 결과 또는 아래 명령으로 `data_volume_id`를 확인한다.
+
+```bash
+terraform output data_volume_id
+```
+
+그 값은 상위 `infra` 레이어가 기존 Data EBS를 조회하고 attachment를 만들 때 사용한다.
+상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 현재 공인 IPv4 주소와 그 ID를
+입력한다.
 
 ```bash
 cd ..
@@ -53,7 +75,9 @@ cp terraform.tfvars.example terraform.tfvars
 `terraform.tfvars`는 Git에 포함하지 않는다. SSH에 사용할 기존 키 페어는
 `key_pair_name`으로 지정하며, 기본값은 `j4eu-ec2`다.
 
-기존 단일 state에서 Data EBS를 이미 만들었다면 새 Data EBS를 만들지 않는다.
+위 순서는 새 구성을 위한 것이다. 이전에 상위 `infra` state 안에서 Data EBS를 이미
+만들었다면 새 볼륨을 만들지 않는다. 기존 Data EBS 리소스의 state 소유권만 `data-ebs`
+레이어로 옮긴다.
 먼저 `data-ebs/terraform.tfvars.example`을 `data-ebs/terraform.tfvars`로 복사하고
 Data EBS의 Availability Zone을 입력한다. `data-ebs`를 초기화한 다음, 아래처럼
 해당 리소스의 state만 이동한다.
@@ -77,8 +101,8 @@ terraform plan
 terraform apply
 ```
 
-apply 뒤에는 `public_ip`로 EC2에 접속하고, `data_volume_id`가 Data EBS 레이어의
-출력과 같은지 확인한다.
+apply 뒤에는 `terraform output public_ip`로 확인한 주소로 EC2에 접속한다.
+`terraform output data_volume_id`가 `data-ebs` 레이어의 출력과 같은지도 확인한다.
 
 ## Data EBS와 Compose 연결
 
@@ -90,7 +114,9 @@ EC2 최초 부팅 시 `/dev/sdf`로 연결된 Data EBS가 나타날 때까지 �
 `/srv/store-expiration-tracker/data`에 마운트한다. 따라서 EC2를 교체해 NVMe 장치명이
 달라져도 같은 Data EBS를 자동으로 연결할 수 있다.
 
-그 뒤 EC2에서는 기본 Compose 파일과 전용 오버라이드를 함께 사용한다.
+그 뒤 EC2의 프로젝트 checkout 최상위에서 기본 Compose 파일과 EC2 전용 오버라이드를
+함께 사용한다. 이 README는 Docker 설치, 애플리케이션 checkout, secret 파일 준비를
+자동화하지 않는다.
 
 ```bash
 docker compose -f compose.yaml -f compose.ec2.yaml up --build -d
