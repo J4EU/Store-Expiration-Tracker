@@ -59,19 +59,19 @@ resource "aws_security_group" "deployment" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    description = "SSH from the operator current public IP"
+    description = "SSH from approved operator networks"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_operator_cidr]
+    cidr_blocks = var.allowed_operator_cidrs
   }
 
   ingress {
-    description = "Nginx application access from the operator"
+    description = "Nginx application access from approved operator networks"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_operator_cidr]
+    cidr_blocks = var.allowed_operator_cidrs
   }
 
   egress {
