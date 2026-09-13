@@ -27,12 +27,15 @@ variable "data_volume_id" {
   type        = string
 }
 
-variable "allowed_operator_cidr" {
-  description = "Your current public IPv4 address in CIDR form, for example 203.0.113.10/32."
-  type        = string
+variable "allowed_operator_cidrs" {
+  description = "Public IPv4 CIDR blocks allowed to access the instance through operator-facing ports such as SSH and Nginx."
+  type        = list(string)
 
   validation {
-    condition     = can(cidrhost(var.allowed_operator_cidr, 0))
-    error_message = "allowed_operator_cidr must be a valid CIDR block, such as 203.0.113.10/32."
+    condition = length(var.allowed_operator_cidrs) > 0 && alltrue([
+      for cidr in var.allowed_operator_cidrs : can(cidrhost(cidr, 0))
+    ])
+
+    error_message = "allowed_operator_cidrs must contain at least one valid CIDR block, such as 203.0.113.10/32."
   }
 }

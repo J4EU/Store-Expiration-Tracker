@@ -25,7 +25,7 @@ Terraform은 이를 그대로 EC2에 전달한다.
 ## 구성
 
 - default VPC의 default subnet에 Amazon Linux 2023 `t3.micro` EC2 1대
-- `allowed_operator_cidr`에만 SSH(`22`)와 Nginx(`8080`)를 허용하는 보안 그룹
+- `allowed_operator_cidrs`에 등록한 집·편의점 공인 IP에만 SSH(`22`)와 Nginx(`8080`)를 허용하는 보안 그룹
 - `data-ebs` 레이어에서 생성하는 20GB `gp3` Data EBS 1개
 
 이 구성은 선택한 AWS 리전에 default VPC와 default subnet이 있고, `key_pair_name`에
@@ -64,8 +64,8 @@ terraform output data_volume_id
 ```
 
 그 값은 상위 `infra` 레이어가 기존 Data EBS를 조회하고 attachment를 만들 때 사용한다.
-상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 현재 공인 IPv4 주소와 그 ID를
-입력한다.
+상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 집·편의점 공인 IPv4 CIDR 목록과
+그 ID를 입력한다.
 
 ```bash
 cd ..
