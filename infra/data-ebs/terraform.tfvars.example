@@ -1,0 +1,2 @@
+# EC2를 생성할 default subnet이 있는 Availability Zone을 지정한다.
+availability_zone = "ap-northeast-2a"
