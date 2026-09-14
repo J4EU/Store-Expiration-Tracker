@@ -42,8 +42,7 @@ Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 선택하므로 EC2와 Data EBS는 연결 가능한 AZ에 생성된다.
 
 이 구성이 선택된 이유와 데이터 보존·복구·복원의 구분은
-[Issue #44 Decision: EC2 / EBS 수명주기](../docs/deployment/issue-44-ec2-ebs-lifecycle-decision.md)에
-정리한다.
+[Data EBS Lifecycle](../docs/decisions/data-ebs-lifecycle.md)에 정리한다.
 
 ## 적용 준비
 
