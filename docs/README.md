@@ -4,39 +4,32 @@
 
 ## Product
 
-제품 문제 정의, MVP 범위, 실제 사용 후 조정된 제품 정책을 다룹니다.
+현재 제품 문제·범위·운영 규칙과 제품이 출발한 역사적 맥락을 다룹니다.
 
-- [프로젝트 시작 동기](product/project-motivation.md)
-- [문제 정의](product/problem.md)
-- [초기 MVP](product/mvp.md)
-- [MVP 방향 전환](product/mvp-pivot.md)
-- [MVP Decisions](product/mvp-decisions.md)
-- [MVP DB Concept](product/mvp-db-concept.md)
-- [Issue #6 Review: 폐기 이력 저장 범위 재검토](product/issue-6-discard-history-review.md)
-- [Issue #10 Review: 폐기 수량 0 상황 처리 정책 정의](product/issue-10-no-discard-flow.md)
+- [Product Overview](product/overview.md)
+- [Product Operating Rules](product/operating-rules.md)
+- [Product Problem Observation](product/product-problem-observation.md)
+- [Product Direction Pivot](product/product-direction-pivot.md)
 
 ## Development
 
-로컬 실행, 백엔드/프론트엔드 구현 기준, 기술 선택과 구현 개요를 다룹니다.
+로컬 개발환경 실행과 애플리케이션 코드 탐색 방법을 다룹니다.
 
-- [Backend Quickstart](development/backend-quickstart.md)
-- [Backend Implementation Guide](development/backend-implementation-guide.md)
-- [Frontend Implementation Guide](development/frontend-implementation-guide.md)
-- [MVP Implementation Outline](development/mvp-implementation-outline.md)
-- [Tech Stack Decision](development/tech-stack-decision.md)
+- [Local Development](development/local-development.md)
+- [Application Development Guide](development/application-development-guide.md)
 
-## Deployment
+## Decisions
 
-1차 운영 배포 준비, 인증/세션 정책, dev/prod 설정 분리, 공개 범위와 검증 기준을 다룹니다.
+현재 적용되는 중요한 결정과 재검토 조건을 다룹니다.
 
-- [배포 전 인증 검증 Runbook 초안](deployment/pre-deploy-auth-runbook.md)
-- [Issue #20 Review: 배포용 인증/세션 설정 정리](deployment/issue-20-deployment-auth-session-policy.md)
-- [Issue #21 Review: 로컬/배포 환경변수 기반 연결 설정 분리](deployment/issue-21-env-config-separation.md)
-- [Issue #22 Review: 운영 배포 공개 범위와 비밀값 운영 기준 정리](deployment/issue-22-public-scope-secret-operations.md)
-- [Issue #23 Review: 배포 전 인증 검증 체크리스트 정리](deployment/issue-23-pre-deploy-auth-checklist.md)
-- [Issue #28 SPA fallback and routing policy](deployment/issue-28-spa-fallback-routing-policy.md)
-- [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](deployment/issue-41-local-deployment-path.md)
-- [Issue #44 Decision: EC2 / EBS 수명주기](deployment/issue-44-ec2-ebs-lifecycle-decision.md)
+- [Decisions](decisions/README.md)
+
+## Architecture
+
+현재 애플리케이션 요청 흐름과 인프라·데이터 lifecycle 경계를 다룹니다.
+
+- [Application and Request Flow](architecture/application-and-request-flow.md)
+- [Infrastructure and Data Lifecycle](architecture/infrastructure-and-data-lifecycle.md)
 
 ## Process
 
