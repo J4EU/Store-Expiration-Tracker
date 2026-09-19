@@ -58,6 +58,6 @@
 
 ## 구현 경계
 
-- 정확한 table, column, constraint, trigger, index: [`db/schema.sql`](../../db/schema.sql)
-- 정확한 API 동작과 입력 validation: [`app/main.py`](../../app/main.py), [`app/schemas.py`](../../app/schemas.py)
+- 정확한 table, column, constraint, trigger, index: [`backend/db/schema.sql`](../../backend/db/schema.sql)
+- 정확한 API 동작과 입력 validation: [`backend/app/main.py`](../../backend/app/main.py), [`backend/app/schemas.py`](../../backend/app/schemas.py)
 - 실제 화면과 interaction: [`frontend/src/`](../../frontend/src/)

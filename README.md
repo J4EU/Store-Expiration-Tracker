@@ -34,10 +34,11 @@
 ### 백엔드
 
 ```bash
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp deploy/dev/backend.env.example .env
+cp ../deploy/dev/backend.env.example .env
 set -a
 source .env
 set +a
@@ -45,7 +46,7 @@ uvicorn app.main:app --reload
 ```
 
 - API 문서: [http://localhost:8000/docs](http://localhost:8000/docs)
-- DB 파일: `data/store_expiration_tracker.db`
+- DB 파일: `backend/data/store_expiration_tracker.db`
 - 로컬 기본값: `APP_ENV=development`, `SESSION_COOKIE_SECURE=false`
 
 ### 프론트엔드
@@ -112,8 +113,8 @@ frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결한 현재 요�
 현재는 Vue 기반 프론트엔드와 FastAPI 백엔드로 로컬 검증 가능한 운영 흐름과 운영자 로그인 연결까지 반영해 둔 상태입니다.
 
 - 프론트엔드 소스: `frontend/`
-- 백엔드 소스: `app/`
-- 현재 로컬 DB: `data/store_expiration_tracker.db`
+- 백엔드 소스: `backend/app/`
+- 현재 로컬 DB: `backend/data/store_expiration_tracker.db`
 
 현재 접근 제어 기준은 아래와 같습니다.
 

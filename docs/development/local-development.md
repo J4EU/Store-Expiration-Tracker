@@ -11,14 +11,15 @@
 
 ## 1. Backend 실행
 
-저장소 루트에서 가상환경과 로컬 설정을 준비한다.
+저장소 루트에서 `backend/`로 이동한 뒤 가상환경과 로컬 설정을 준비한다.
 
 ```bash
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp deploy/dev/backend.env.example .env
+cp ../deploy/dev/backend.env.example .env
 ```
 
 `.env`에서 최소한 아래 두 placeholder를 로컬 전용 값으로 바꾼다.
@@ -35,7 +36,7 @@ set +a
 uvicorn app.main:app --reload
 ```
 
-서버 시작 과정에서 SQLite DB는 `data/store_expiration_tracker.db`에 자동으로 준비된다. `data/`는 Git에 포함하지 않는다.
+서버 시작 과정에서 SQLite DB는 `backend/data/store_expiration_tracker.db`에 자동으로 준비된다. `backend/data/`는 Git에 포함하지 않는다.
 
 로컬 Backend 주소와 개발용 OpenAPI 문서는 아래와 같다.
 
@@ -66,7 +67,7 @@ npm run dev
 4. `등록 시작 -> 바코드 조회 -> 상품 또는 소비기한 반영` 흐름을 실행한다.
 5. 대시보드에서 `오늘 처리`와 `미확인` 목록이 갱신되는지 확인한다.
 
-API의 정확한 endpoint와 요청·응답 형태는 실행 중인 `http://localhost:8000/docs` 또는 `app/main.py`, `app/schemas.py`를 기준으로 확인한다.
+API의 정확한 endpoint와 요청·응답 형태는 실행 중인 `http://localhost:8000/docs` 또는 `backend/app/main.py`, `backend/app/schemas.py`를 기준으로 확인한다.
 
 ## 종료와 자주 확인할 것
 

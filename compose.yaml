@@ -12,7 +12,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./backend
     env_file:
       - ${BACKEND_ENV_FILE:-./deploy/compose-local/backend.env}
     expose:
