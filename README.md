@@ -2,7 +2,7 @@
 
 편의점에서 상품별 소비기한 상태를 끊기지 않게 추적하기 위한 프로젝트입니다.
 
-이 저장소는 실제 현장에서 겪은 소비기한 관리 문제를 바탕으로, 로컬에서 바로 검증 가능한 추적 도구를 만든 과정을 다룹니다. 현재는 FastAPI 백엔드와 Vue 프론트엔드로 MVP를 구현해 두었고, 다음 단계로 배포 가능한 형태로 다듬고 있습니다.
+이 저장소는 실제 현장에서 겪은 소비기한 관리 문제를 바탕으로, 로컬에서 바로 검증 가능한 추적 도구를 만든 과정을 다룹니다. 현재는 FastAPI 백엔드와 Vue 프론트엔드로 제품의 운영 흐름을 구현해 두었습니다.
 
 ## 지금 할 수 있는 것
 
@@ -16,7 +16,7 @@
 
 ## 대표 흐름
 
-현재 MVP를 가장 잘 설명하는 기본 흐름은 아래와 같습니다.
+현재 제품의 기본 흐름은 아래와 같습니다.
 
 1. `등록 시작`
 2. `바코드 조회`
@@ -63,13 +63,13 @@ npm run dev
 
 로컬 개발에서는 프론트가 `/api/...`로 요청하고, Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000/...`으로 프록시합니다. FastAPI 라우트는 현재처럼 `/auth/login`, `/dashboard`, `/products` 등을 유지합니다.
 
-현재 MVP는 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Issue #28 SPA fallback and routing policy](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/deployment/issue-28-spa-fallback-routing-policy.md)에 정리합니다.
+현재 제품은 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Application and Request Flow](docs/architecture/application-and-request-flow.md)에 정리합니다.
 
-운영과 유사한 배포 경로의 구성과 로컬 검증은 [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](docs/deployment/issue-41-local-deployment-path.md)에 정리합니다.
+운영과 유사한 로컬 Compose 경로의 현재 구조는 [Application and Request Flow](docs/architecture/application-and-request-flow.md)에 정리합니다. 당시 로컬 검증 증거는 [PR #42](https://github.com/J4EU/Store-Expiration-Tracker/pull/42)에 남아 있습니다.
 
 ### 로컬 최소 배포 경로 구성 및 검증
 
-빠른 실제 운영 배포를 위해 frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결하고 로컬에서 실제 요청 경계를 검증합니다. 구조 결정과 구현·실행·보정 결과는 [Issue #41 Review: 로컬 최소 배포 경로 구성 및 검증](docs/deployment/issue-41-local-deployment-path.md)에 함께 기록합니다.
+frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결한 현재 요청 경계는 [Application and Request Flow](docs/architecture/application-and-request-flow.md)를 참고합니다. 실제 운영 절차와 production 검증은 이 문서가 다루지 않습니다.
 
 처음 확인할 때는 `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 순서로 보면 됩니다.
 
@@ -81,11 +81,11 @@ npm run dev
 
 핵심은 단순히 소비기한 날짜를 저장하는 것이 아니라, 한 번 관리 대상으로 올린 상품이 지금 `확인됨` 상태인지 `미확인` 상태인지가 시스템에 계속 남아 있도록 만드는 것입니다.
 
-초기 가정에서 출발해 실제 등록 작업 후 방향을 어떻게 조정했는지는 [프로젝트 시작 동기](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/project-motivation.md), [MVP 방향 전환](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-pivot.md), [MVP Decisions](https://github.com/J4EU/Store-Expiration-Tracker/blob/main/docs/product/mvp-decisions.md)에서 나눠 정리합니다.
+현재 Product의 문제·범위·운영 규칙은 [Product Overview](docs/product/overview.md)와 [Product Operating Rules](docs/product/operating-rules.md)를 참고하세요. 초기 가설이 실제 등록 작업 뒤 어떻게 바뀌었는지는 [Product Direction Pivot](docs/product/product-direction-pivot.md)에 남겨 두었습니다.
 
 ## 현재 범위
 
-현재 MVP에서 다루는 범위는 아래와 같습니다.
+현재 제품에서 다루는 범위는 아래와 같습니다.
 
 - 상품별 현재 소비기한 상태 추적
 - `expiration_date = NULL`도 정상적인 `미확인` 상태로 유지
@@ -105,17 +105,15 @@ npm run dev
 - 매출 및 판매 분석 기능
 - 복잡한 분석 대시보드
 - 멀티 점포 데이터 모델
-- 공개 회원가입 기능
+- 다중 사용자 및 역할 기반 권한 관리
 
 ## 현재 상태
 
-현재는 Vue 기반 프론트엔드와 FastAPI 백엔드로 로컬 검증 가능한 MVP를 구현해 두었고, 운영 API 접근 제어의 1차 뼈대와 프론트 로그인 연결까지 반영해 둔 상태입니다.
+현재는 Vue 기반 프론트엔드와 FastAPI 백엔드로 로컬 검증 가능한 운영 흐름과 운영자 로그인 연결까지 반영해 둔 상태입니다.
 
 - 프론트엔드 소스: `frontend/`
 - 백엔드 소스: `app/`
 - 현재 로컬 DB: `data/store_expiration_tracker.db`
-
-이후에는 누적된 폐기 데이터를 바탕으로 발주 판단에 참고할 수 있는 구조와, 실제 배포 가능한 운영 형태로 확장하는 방향을 염두에 두고 있습니다.
 
 현재 접근 제어 기준은 아래와 같습니다.
 
