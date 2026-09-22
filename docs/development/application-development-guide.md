@@ -12,8 +12,8 @@ Browser
   -> frontend/src/api.js
   -> /api/...
   -> Vite development proxy
-  -> FastAPI application (app/main.py)
-  -> SQLite (data/store_expiration_tracker.db)
+  -> FastAPI application (backend/app/main.py)
+  -> SQLite (backend/data/store_expiration_tracker.db)
 ```
 
 이 흐름은 로컬 개발 기준이다. production 배포 구조와 검증 상태는 이 문서의 범위가 아니다.
@@ -22,12 +22,12 @@ Browser
 
 | 수정하려는 것 | 먼저 볼 위치 | 책임 |
 | --- | --- | --- |
-| API 진입점과 처리 흐름 | `app/main.py` | FastAPI route, 인증 의존성 연결, 도메인 처리 조합 |
-| 인증과 세션 | `app/auth.py` | 운영자 인증, 세션 생성·검증, 쿠키 처리 |
-| 런타임 설정 | `app/settings.py`, `deploy/dev/backend.env.example` | 개발·production 환경별 설정 읽기와 예시 값 |
-| DB 연결과 초기화 | `app/db.py` | DB 경로, 연결, 시작 시 스키마 초기화 |
-| API schema | `app/schemas.py` | request/response 모델과 입력 검증 |
-| DB 구조 | `db/schema.sql` | table, constraint, trigger, index |
+| API 진입점과 처리 흐름 | `backend/app/main.py` | FastAPI route, 인증 의존성 연결, 도메인 처리 조합 |
+| 인증과 세션 | `backend/app/auth.py` | 운영자 인증, 세션 생성·검증, 쿠키 처리 |
+| 런타임 설정 | `backend/app/settings.py`, `deploy/dev/backend.env.example` | 개발·production 환경별 설정 읽기와 예시 값 |
+| DB 연결과 초기화 | `backend/app/db.py` | DB 경로, 연결, 시작 시 스키마 초기화 |
+| API schema | `backend/app/schemas.py` | request/response 모델과 입력 검증 |
+| DB 구조 | `backend/db/schema.sql` | table, constraint, trigger, index |
 | 화면 상태와 사용자 상호작용 | `frontend/src/App.vue` | 로그인, 대시보드, 등록, 처리, 아카이브 화면 흐름 |
 | API 호출 | `frontend/src/api.js` | API base URL, HTTP 요청, 오류 처리 |
 | 화면 스타일 | `frontend/src/styles.css` | Vue 화면의 CSS |
@@ -41,13 +41,13 @@ Browser
 
 반대로 정확한 endpoint, schema field, SQL constraint, trigger, index는 이 문서가 아니라 코드가 기준이다.
 
-- API 계약: 실행 중인 `http://localhost:8000/docs`, `app/main.py`, `app/schemas.py`
-- DB 구조: `db/schema.sql`
+- API 계약: 실행 중인 `http://localhost:8000/docs`, `backend/app/main.py`, `backend/app/schemas.py`
+- DB 구조: `backend/db/schema.sql`
 - 실제 화면 동작: `frontend/src/`
 
 ### Backend와 Frontend를 함께 바꿔야 하는 경우
 
-API contract가 바뀌면 `app/main.py`와 `app/schemas.py`만 수정하고 끝내지 않는다. 해당 요청을 보내거나 응답을 해석하는 `frontend/src/api.js`와 `frontend/src/App.vue`도 함께 확인한다.
+API contract가 바뀌면 `backend/app/main.py`와 `backend/app/schemas.py`만 수정하고 끝내지 않는다. 해당 요청을 보내거나 응답을 해석하는 `frontend/src/api.js`와 `frontend/src/App.vue`도 함께 확인한다.
 
 화면만 바꿔도 API 호출 순서, 로그인 상태, 오류 처리에 영향을 줄 수 있다. 먼저 `App.vue`에서 호출 지점을 찾고, `api.js`를 거쳐 Backend route와 schema까지 확인한다.
 

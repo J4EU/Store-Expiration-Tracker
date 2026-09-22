@@ -49,4 +49,4 @@ Vite도 `/api` prefix를 제거한 뒤 FastAPI의 기존 route로 전달한다. 
 
 - `compose.yaml`, `compose.ec2.yaml`
 - `frontend/nginx.conf`, `frontend/vite.config.js`, `frontend/src/api.js`
-- `app/main.py`, `app/auth.py`, `app/db.py`
+- `backend/app/main.py`, `backend/app/auth.py`, `backend/app/db.py`
