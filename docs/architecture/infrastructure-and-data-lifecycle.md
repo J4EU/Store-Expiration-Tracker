@@ -1,6 +1,6 @@
 # Infrastructure and Data Lifecycle
 
-이 문서는 현재 Terraform과 EC2 Compose override가 만드는 EC2와 SQLite 데이터의 lifecycle 경계를 설명한다. Terraform 실행 방법과 shell 구현 세부사항은 `infra/`와 [infra/README.md](../../infra/README.md)를 기준으로 확인한다.
+이 문서는 현재 Terraform과 EC2용 Compose 파일이 만드는 EC2와 SQLite 데이터의 lifecycle 경계를 설명한다. Terraform 실행 방법과 shell 구현 세부사항은 `infra/`와 [infra/README.md](../../infra/README.md)를 기준으로 확인한다.
 
 ## 책임 경계
 
@@ -27,7 +27,7 @@ EC2 최초 부팅 시 user data는 attachment device를 기다린 뒤 파일시�
 - 알 수 없는 디스크 signature는 포맷하지 않고 실패한다.
 - filesystem UUID를 `/etc/fstab`에 기록하고, Data EBS를 `/srv/store-expiration-tracker/data`에 mount한다.
 
-EC2용 Compose override는 이 host 경로를 backend의 `/app/data`에 bind mount한다. 따라서 backend가 사용하는 SQLite 경로는 local Compose와 같지만, EC2에서는 Data EBS가 그 데이터를 제공한다.
+EC2용 Compose 파일은 이 host 경로를 backend의 `/app/data`에 bind mount한다. 따라서 backend가 사용하는 SQLite 경로는 local Compose와 같지만, EC2에서는 Data EBS가 그 데이터를 제공한다.
 
 ## EC2 교체 시 경계
 
@@ -45,7 +45,7 @@ EC2 layer를 교체해도 Data EBS가 보존되어 있고 같은 `data_volume_id
 
 ## 현재 확인 범위
 
-이 문서는 repository에 있는 Terraform, user data, Compose override가 의도한 구조를 설명한다. 특정 AWS resource가 지금 존재하는지, 또는 현재 운영 EC2에서 어떤 환경변수가 사용 중인지는 여기서 주장하지 않는다.
+이 문서는 repository에 있는 Terraform, user data, EC2용 Compose 파일이 의도한 구조를 설명한다. 특정 AWS resource가 지금 존재하는지, 또는 현재 운영 EC2에서 어떤 환경변수가 사용 중인지는 여기서 주장하지 않는다.
 
 ## Source of truth
 

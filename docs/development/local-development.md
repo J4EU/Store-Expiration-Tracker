@@ -19,7 +19,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp ../deploy/dev/backend.env.example .env
+cp .env.example .env
 ```
 
 `.env`에서 최소한 아래 두 placeholder를 로컬 전용 값으로 바꾼다.

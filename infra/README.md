@@ -113,17 +113,20 @@ EC2 최초 부팅 시 `/dev/sdf`로 연결된 Data EBS가 나타날 때까지 �
 `/srv/store-expiration-tracker/data`에 마운트한다. 따라서 EC2를 교체해 NVMe 장치명이
 달라져도 같은 Data EBS를 자동으로 연결할 수 있다.
 
-그 뒤 EC2의 프로젝트 checkout 최상위에서 기본 Compose 파일과 EC2 전용 오버라이드를
-함께 사용한다. 이 README는 Docker 설치, 애플리케이션 checkout, secret 파일 준비를
-자동화하지 않는다.
+그 뒤 EC2의 프로젝트 checkout 최상위에서 EC2 전용 Compose 파일만 사용한다. 이 README는
+Docker 설치, 애플리케이션 checkout, secret 파일 준비를 자동화하지 않는다.
 
 ```bash
-docker compose -f compose.yaml -f compose.ec2.yaml up --build -d
+cp deploy/prod/backend.env.example deploy/prod/backend.env
+# deploy/prod/backend.env의 placeholder를 실제 값으로 바꾼다.
+docker compose -f compose.ec2.yaml up --build -d
 ```
 
-[compose.ec2.yaml](../compose.ec2.yaml)은 backend의 `/app/data`를 Data EBS의
+[compose.ec2.yaml](../compose.ec2.yaml)은 로컬 [compose.yaml](../compose.yaml)과
+독립된 파일이다. backend 환경변수는 `deploy/prod/backend.env`에서만 읽고, 파일이 없으면
+Compose가 실행을 거부한다. backend의 `/app/data`는 Data EBS의
 `/srv/store-expiration-tracker/data`에 bind mount한다. 로컬 Compose의
-`sqlite_data` named volume 구성은 이 파일을 사용하지 않으므로 바뀌지 않는다.
+`sqlite_data` named volume 구성은 이 파일과 관계가 없다.
 
 ## 수명 주기 운영
 

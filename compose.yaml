@@ -14,7 +14,7 @@ services:
     build:
       context: ./backend
     env_file:
-      - ${BACKEND_ENV_FILE:-./deploy/compose-local/backend.env}
+      - ./deploy/compose-local/backend.env
     expose:
       - "8000"
     volumes:
