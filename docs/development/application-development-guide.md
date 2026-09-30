@@ -24,7 +24,7 @@ Browser
 | --- | --- | --- |
 | API 진입점과 처리 흐름 | `backend/app/main.py` | FastAPI route, 인증 의존성 연결, 도메인 처리 조합 |
 | 인증과 세션 | `backend/app/auth.py` | 운영자 인증, 세션 생성·검증, 쿠키 처리 |
-| 런타임 설정 | `backend/app/settings.py`, `deploy/dev/backend.env.example` | 개발·production 환경별 설정 읽기와 예시 값 |
+| 런타임 설정 | `backend/app/settings.py`, `backend/.env.example` | 개발·production 환경별 설정 읽기와 예시 값 |
 | DB 연결과 초기화 | `backend/app/db.py` | DB 경로, 연결, 시작 시 스키마 초기화 |
 | API schema | `backend/app/schemas.py` | request/response 모델과 입력 검증 |
 | DB 구조 | `backend/db/schema.sql` | table, constraint, trigger, index |
@@ -53,7 +53,7 @@ API contract가 바뀌면 `backend/app/main.py`와 `backend/app/schemas.py`만 �
 
 ### 환경 설정을 바꿀 때
 
-로컬 설정 예시는 `deploy/dev/backend.env.example`과 `frontend/.env.example`에 있다. 실제 `.env` 값은 커밋하지 않는다.
+로컬 설정 예시는 `backend/.env.example`과 `frontend/.env.example`에 있다. 실제 `.env` 값은 커밋하지 않는다.
 
 `VITE_` 환경변수는 Frontend build/dev-server 쪽 설정이고, Backend 환경변수와 다른 시점에 읽힌다. Vite 설정이나 `frontend/.env`를 바꿨다면 개발 서버를 다시 시작해 반영 여부를 확인한다.
 

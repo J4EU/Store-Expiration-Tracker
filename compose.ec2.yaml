@@ -1,6 +1,33 @@
+name: store-expiration-tracker-local
+
 services:
+  nginx:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
   backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./deploy/prod/backend.env
+    expose:
+      - "8000"
     volumes:
       - type: bind
         source: /srv/store-expiration-tracker/data
         target: /app/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s

@@ -4,6 +4,7 @@ __pycache__/
 .env
 frontend/.env
 deploy/compose-local/backend.env
+deploy/prod/backend.env
 
 data/
 frontend/node_modules/

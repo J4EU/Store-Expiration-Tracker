@@ -37,7 +37,7 @@ Vite도 `/api` prefix를 제거한 뒤 FastAPI의 기존 route로 전달한다. 
 
 ## SQLite 저장 경계
 
-애플리케이션은 `/app/data` 아래 SQLite 파일을 사용한다. 기본 Compose에서는 `sqlite_data` named volume이 이 경로를 제공해 컨테이너 생명주기와 로컬 DB 파일을 분리한다. EC2용 Compose override에서는 같은 container 경로를 Data EBS가 mount된 host 경로에 bind mount한다.
+애플리케이션은 `/app/data` 아래 SQLite 파일을 사용한다. 로컬 Compose(`compose.yaml`)에서는 `sqlite_data` named volume이 이 경로를 제공해 컨테이너 생명주기와 로컬 DB 파일을 분리한다. EC2용 Compose(`compose.ec2.yaml`)에서는 같은 container 경로를 Data EBS가 mount된 host 경로에 bind mount한다.
 
 이 차이는 local named volume이 EC2 교체에도 데이터를 보존한다는 뜻이 아니다. EC2와 Data EBS의 lifecycle 경계는 [Infrastructure and Data Lifecycle](infrastructure-and-data-lifecycle.md)에서 다룬다.
 
