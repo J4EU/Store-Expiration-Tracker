@@ -30,3 +30,5 @@ squash commit 제목은 저장소 설정(`COMMIT_OR_PR_TITLE`)이 채워 주는 
 - PR에 커밋이 1개면 그 커밋 제목을 쓴다.
 - PR에 커밋이 2개 이상이면 PR 제목을 쓴다.
 - 기본값은 병합할 때 사람이 직접 수정할 수 있다.
+
+squash commit 본문은 저장소 설정(`COMMIT_MESSAGES`)대로 PR 안의 커밋 메시지 목록을 남긴다. merge commit처럼 개별 커밋을 `main` 히스토리에 남기지는 않지만, squash commit에서 PR의 자세한 커밋 내역을 볼 수 있어서 이 방식을 사용한다.
