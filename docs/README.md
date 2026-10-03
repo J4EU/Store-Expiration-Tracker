@@ -31,6 +31,12 @@
 - [Application and Request Flow](architecture/application-and-request-flow.md)
 - [Infrastructure and Data Lifecycle](architecture/infrastructure-and-data-lifecycle.md)
 
+## Operations
+
+배포 환경을 준비하고 운영하는 절차를 다룹니다.
+
+- [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md)
+
 ## Process
 
 저장소 작업 흐름과 main 보호 정책을 다룹니다.
