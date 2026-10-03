@@ -1,4 +1,4 @@
-name: store-expiration-tracker-local
+name: store-expiration-tracker-prod
 
 services:
   nginx:
