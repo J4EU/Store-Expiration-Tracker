@@ -23,11 +23,7 @@
 
 - AWS 자격증명이 설정되어 있고 Terraform(`>= 1.15.0`)이 설치되어 있다.
 - `ap-northeast-2`에 EC2 키 페어가 있고, 그 private key 파일을 로컬에 가지고 있다. 기본 키 페어 이름은 `j4eu-ec2`다.
-- 접속할 네트워크의 공인 IPv4를 확인한다.
-
-```bash
-curl -s https://checkip.amazonaws.com
-```
+- EC2에 접속할 네트워크에서 그 네트워크의 공인 IPv4를 확인할 수 있다.
 
 ## 2. 인프라 생성 [로컬]
 
@@ -61,7 +57,12 @@ cp infra/terraform.tfvars.example infra/terraform.tfvars
 
 `infra/terraform.tfvars`에 아래 값을 입력한다.
 
-- `allowed_operator_cidrs`: 1단계에서 확인한 공인 IP를 `/32`로 입력한다.
+- `allowed_operator_cidrs`: EC2에 접속할 네트워크의 공인 IPv4를 `/32`로 입력한다. 그 네트워크에서 아래 명령으로 확인한다.
+
+  ```bash
+  curl -s https://checkip.amazonaws.com
+  ```
+
 - `data_volume_id`: 2-1에서 확인한 값을 입력한다.
 
 ```bash
@@ -167,10 +168,10 @@ SESSION_COOKIE_SECURE=false
 ## 7. 실행 [EC2]
 
 ```bash
-docker compose -f compose.ec2.yaml up --build -d --wait
+docker compose -f compose.ec2.yaml up --build --wait
 ```
 
-이미지를 EC2에서 직접 build하므로 첫 실행은 시간이 걸린다. `--wait`는 backend와 nginx가 실행·healthy 상태가 될 때까지 기다린다.
+이미지를 EC2에서 직접 build하므로 첫 실행은 시간이 걸린다. `--wait`는 detached mode로 실행하고, health check가 있는 backend는 `healthy`, health check가 없는 nginx는 `running` 상태가 될 때까지 기다린다.
 
 ## 8. 동작 확인
 
@@ -216,7 +217,7 @@ terraform -chdir=infra output public_ip
 ```bash
 findmnt /srv/store-expiration-tracker/data
 cd Store-Expiration-Tracker
-docker compose -f compose.ec2.yaml up -d --wait
+docker compose -f compose.ec2.yaml up --wait
 ```
 
 이후 8단계로 확인한다. 기존 데이터가 그대로 보여야 한다.
@@ -226,7 +227,7 @@ docker compose -f compose.ec2.yaml up -d --wait
 ```bash
 cd Store-Expiration-Tracker
 git pull
-docker compose -f compose.ec2.yaml up --build -d --wait
+docker compose -f compose.ec2.yaml up --build --wait
 ```
 
 `deploy/prod/backend.env`는 Git이 추적하지 않으므로 `git pull`로 바뀌지 않는다. `backend.env.example`에 새 변수가 추가됐다면 직접 반영한다. 이후 8단계로 확인한다.
