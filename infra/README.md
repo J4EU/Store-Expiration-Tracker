@@ -167,5 +167,7 @@ Data EBS는 별도 `data-ebs` state에 있으므로 남는다. Data EBS를 폐�
 
 ## 관련 기록
 
+- [EC2 Manual Deploy Runbook](../docs/operations/ec2-manual-deploy.md): 새 EC2에서
+  서비스 실행까지의 수동 배포 절차
 - [EC2 Compose 검증 스파이크](compose-spike.md): Data EBS 분리 이전에 수행한
   EC2 Compose 실행 관찰 기록
