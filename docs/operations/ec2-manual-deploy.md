@@ -104,17 +104,18 @@ docker 그룹 권한을 반영하려고 SSH를 다시 접속한다.
 
 ### 4-2. Docker Compose와 Buildx 설치
 
-Amazon Linux 2023 패키지 저장소에는 Docker Compose v2 plugin과 Compose build에 필요한 Buildx가 없다. GitHub release 바이너리를 Docker CLI plugin 경로에 설치한다.
+Amazon Linux 2023 패키지 저장소에는 Docker Compose plugin과 Compose build에 필요한 Buildx가 없다. GitHub release 바이너리를 Docker CLI plugin 경로에 설치한다. 버전은 이 Runbook을 검증할 때 사용한 버전으로 고정한다.
 
 ```bash
+COMPOSE_VERSION=v5.6.0
+BUILDX_VERSION=v0.37.2
+
 sudo mkdir -p /usr/local/lib/docker/cli-plugins
 
 sudo curl -fsSL \
-  https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64" \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 
-BUILDX_VERSION="$(curl -fsSL https://api.github.com/repos/docker/buildx/releases/latest \
-  | grep -m1 '"tag_name"' | cut -d '"' -f 4)"
 sudo curl -fsSL \
   "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-amd64" \
   -o /usr/local/lib/docker/cli-plugins/docker-buildx
