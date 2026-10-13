@@ -36,6 +36,7 @@
 배포 환경을 준비하고 운영하는 절차를 다룹니다.
 
 - [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md)
+- [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md)
 
 ## Process
 
