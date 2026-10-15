@@ -68,8 +68,8 @@ resource "aws_security_group" "deployment" {
 
   ingress {
     description = "Nginx application access from approved operator networks"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = var.allowed_operator_cidrs
   }
