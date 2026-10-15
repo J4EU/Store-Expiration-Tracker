@@ -6,7 +6,7 @@
 
 현재 절차는 아래 상태를 전제로 한다.
 
-- 외부 진입점은 HTTP `http://<public_ip>:8080`이다. HTTPS와 443 구성은 없다.
+- 외부 진입점은 HTTP `http://<public_ip>`이다. HTTPS와 443 구성은 없다.
 - backend 환경변수는 EC2 checkout 안의 `deploy/prod/backend.env` 파일로 주입한다.
 - 이미지는 EC2에서 직접 build한다. 이미지 registry는 쓰지 않는다.
 - EC2를 start해도 컨테이너는 자동으로 시작되지 않는다.
@@ -180,7 +180,7 @@ docker compose -f compose.ec2.yaml up --build --wait
 
 ```bash
 docker compose -f compose.ec2.yaml ps
-curl -s http://localhost:8080/api/health
+curl -s http://localhost/api/health
 ```
 
 - 두 서비스가 `running`이고 backend가 `healthy`다.
@@ -188,7 +188,7 @@ curl -s http://localhost:8080/api/health
 
 ### [로컬 브라우저]
 
-1. `http://<public_ip>:8080`에 접속한다.
+1. `http://<public_ip>`에 접속한다.
 2. `admin`과 `ADMIN_PASSWORD`로 로그인한다.
 3. 상품 하나를 등록하고 목록에 나타나는지 확인한다.
 
@@ -247,6 +247,6 @@ EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data
 | --- | --- |
 | Compose가 `deploy/prod/backend.env not found`로 실행을 거부한다 | 6단계의 env 파일을 만들지 않았다. |
 | 로그인은 되는데 이후 요청이 `401`이다 | HTTP에서 `SESSION_COOKIE_SECURE=true`다. 6단계의 테스트 예외를 확인하고 재실행한다. |
-| `up`할 때 8080 포트가 이미 사용 중이다 | 이전 프로젝트 이름으로 실행한 스택이 남아 있다. `docker compose -p store-expiration-tracker-local -f compose.ec2.yaml down`으로 내린 뒤 다시 실행한다. ([PR #66](https://github.com/J4EU/Store-Expiration-Tracker/pull/66)) |
-| SSH나 `:8080` 접속이 timeout된다 | 현재 공인 IP가 `allowed_operator_cidrs`에 없다. 값을 갱신하고 `terraform -chdir=infra apply`를 다시 실행한다. |
+| `up`할 때 80 포트가 이미 사용 중이다 | 이전 프로젝트 이름으로 실행한 스택이 남아 있다. `docker compose -p store-expiration-tracker-local -f compose.ec2.yaml down`으로 내린 뒤 다시 실행한다. ([PR #66](https://github.com/J4EU/Store-Expiration-Tracker/pull/66)) |
+| SSH나 HTTP(`80`) 접속이 timeout된다 | 현재 공인 IP가 `allowed_operator_cidrs`에 없다. 값을 갱신하고 `terraform -chdir=infra apply`를 다시 실행한다. |
 | `findmnt` 출력이 없다 | user data가 아직 실행 중이거나 실패했다. `/var/log/cloud-init-output.log`를 확인한다. |
