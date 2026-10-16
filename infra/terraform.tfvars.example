@@ -6,6 +6,3 @@ allowed_operator_cidrs = [
   "203.0.113.10/32", # 집
   "203.0.113.11/32", # 편의점
 ]
-
-# infra/data-ebs 레이어를 apply한 뒤 출력된 볼륨 ID를 입력한다.
-data_volume_id = "vol-0123456789abcdef0"

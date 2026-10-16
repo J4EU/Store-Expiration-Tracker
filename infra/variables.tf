@@ -22,11 +22,6 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "data_volume_id" {
-  description = "Existing Data EBS volume ID managed by the data-ebs layer."
-  type        = string
-}
-
 variable "allowed_operator_cidrs" {
   description = "Public IPv4 CIDR blocks allowed to access the instance through operator-facing ports such as SSH and Nginx."
   type        = list(string)

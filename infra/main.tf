@@ -29,10 +29,18 @@ data "aws_subnet" "deployment" {
   id = local.subnet_id
 }
 
+data "terraform_remote_state" "data_ebs" {
+  backend = "local"
+
+  config = {
+    path = "${path.module}/data-ebs/terraform.tfstate"
+  }
+}
+
 data "aws_ebs_volume" "sqlite_data" {
   filter {
     name   = "volume-id"
-    values = [var.data_volume_id]
+    values = [data.terraform_remote_state.data_ebs.outputs.data_volume_id]
   }
 }
 

@@ -14,7 +14,6 @@
 이 문서가 다루지 않는 것:
 
 - HTTPS 도입과 시크릿 주입 방식 고도화 ([Issue #65](https://github.com/J4EU/Store-Expiration-Tracker/issues/65))
-- `data_volume_id` 수동 입력 제거 ([Issue #48](https://github.com/J4EU/Store-Expiration-Tracker/issues/48))
 - 이미지 registry, 배포 자동화, 백업·복원
 
 명령의 실행 위치는 각 단계 제목에 `[로컬]` 또는 `[EC2]`로 표시한다.
@@ -31,7 +30,7 @@
 
 ### 2-1. Data EBS 준비
 
-기존 Data EBS를 다시 쓰는 경우 새로 만들지 않는다. `data_volume_id`만 확인한다.
+기존 Data EBS를 다시 쓰는 경우 새로 만들지 않는다. `data_volume_id` output이 있는지만 확인한다.
 
 ```bash
 terraform -chdir=infra/data-ebs output data_volume_id
@@ -63,7 +62,7 @@ cp infra/terraform.tfvars.example infra/terraform.tfvars
   curl -s https://checkip.amazonaws.com
   ```
 
-- `data_volume_id`: 2-1에서 확인한 값을 입력한다.
+Data EBS 볼륨 ID는 입력하지 않는다. EC2 레이어가 `infra/data-ebs/terraform.tfstate`에서 `data_volume_id` output을 읽는다. 그래서 2-1을 먼저 끝내야 한다.
 
 ```bash
 terraform -chdir=infra init
@@ -239,7 +238,7 @@ docker compose -f compose.ec2.yaml up --build --wait
 terraform -chdir=infra destroy
 ```
 
-EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data-ebs`의 별도 state에 있어 남는다. 다음 배포에서 같은 `data_volume_id`로 다시 연결한다. `infra/data-ebs`는 destroy하지 않는다.
+EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data-ebs`의 별도 state에 있어 남는다. 다음 배포에서 EC2 레이어가 `infra/data-ebs` state의 `data_volume_id`를 읽어 다시 연결한다. `infra/data-ebs`는 destroy하지 않는다. EC2 레이어의 destroy도 `infra/data-ebs/terraform.tfstate`를 읽으므로, 이 파일을 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
 
 ## 12. 문제 해결
 
@@ -247,6 +246,8 @@ EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data
 | --- | --- |
 | Compose가 `deploy/prod/backend.env not found`로 실행을 거부한다 | 6단계의 env 파일을 만들지 않았다. |
 | 로그인은 되는데 이후 요청이 `401`이다 | HTTP에서 `SESSION_COOKIE_SECURE=true`다. 6단계의 테스트 예외를 확인하고 재실행한다. |
+| 2-2의 `plan`/`apply`가 `Unable to find remote state`로 실패한다 | `infra/data-ebs/terraform.tfstate`가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
+| 2-2의 `plan`/`apply`가 `This object does not have an attribute named "data_volume_id"`로 실패한다 | `infra/data-ebs` state는 있지만 Data EBS가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
 | `up`할 때 80 포트가 이미 사용 중이다 | 이전 프로젝트 이름으로 실행한 스택이 남아 있다. `docker compose -p store-expiration-tracker-local -f compose.ec2.yaml down`으로 내린 뒤 다시 실행한다. ([PR #66](https://github.com/J4EU/Store-Expiration-Tracker/pull/66)) |
 | SSH나 HTTP(`80`) 접속이 timeout된다 | 현재 공인 IP가 `allowed_operator_cidrs`에 없다. 값을 갱신하고 `terraform -chdir=infra apply`를 다시 실행한다. |
 | `findmnt` 출력이 없다 | user data가 아직 실행 중이거나 실패했다. `/var/log/cloud-init-output.log`를 확인한다. |
