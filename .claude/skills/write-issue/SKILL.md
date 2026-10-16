@@ -52,4 +52,4 @@ triage 이슈
 
 - 유형, 제목, 본문 초안을 사용자에게 보여주고, 승인 전에는 Issue를 생성하지 않는다.
 - 사용자가 수정을 요청하면 반영한 초안을 다시 보여주고 승인을 받는다.
-- 승인 후 `gh issue create --title "<제목>" --body-file <파일>`로 생성한다. triage 이슈는 `--label triage`를 붙인다.
+- 승인 후 `gh issue create --title "<제목>" --body-file <파일>`로 생성한다. triage 이슈는 `--label needs-triage`를 붙인다.
