@@ -10,7 +10,8 @@ infra/data-ebs/ (Data EBS state) -- data_volume_id --> infra/ (EC2 state)
 
 - `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS만 생성하고 보존한다.
 - 이 디렉터리의 상위 `infra` 레이어는 EC2·보안 그룹·Data EBS를 EC2에 연결하는
-  attachment를 관리한다. Data EBS는 새로 만들지 않고 `data_volume_id`로 조회한다.
+  attachment를 관리한다. Data EBS는 새로 만들지 않고, `terraform_remote_state`로
+  `data-ebs` state의 `data_volume_id` output을 읽어 조회한다.
 
 따라서 EC2를 교체해도 같은 Data EBS를 다시 연결할 수 있고, 두 레이어의 Terraform
 state도 분리된다.
@@ -56,15 +57,10 @@ terraform init
 terraform apply
 ```
 
-apply 결과 또는 아래 명령으로 `data_volume_id`를 확인한다.
-
-```bash
-terraform output data_volume_id
-```
-
-그 값은 상위 `infra` 레이어가 기존 Data EBS를 조회하고 attachment를 만들 때 사용한다.
-상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 집·편의점 공인 IPv4 CIDR 목록과
-그 ID를 입력한다.
+상위 `infra` 레이어는 `data-ebs/terraform.tfstate`의 `data_volume_id` output을 읽어
+기존 Data EBS를 조회하고 attachment를 만든다. 볼륨 ID는 직접 입력하지 않는다.
+상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 집·편의점 공인 IPv4 CIDR 목록을
+입력한다.
 
 ```bash
 cd ..
@@ -102,6 +98,20 @@ terraform apply
 
 apply 뒤에는 `terraform output public_ip`로 확인한 주소로 EC2에 접속한다.
 `terraform output data_volume_id`가 `data-ebs` 레이어의 출력과 같은지도 확인한다.
+
+### Data EBS state를 읽지 못할 때
+
+`data-ebs` state를 읽지 못하면 상위 `infra` 레이어는 plan 단계에서 멈춘다. 볼륨 없이
+진행되지는 않는다. 임시 디렉터리에서 Terraform `1.15.8`로 확인한 동작은 아래와 같다.
+
+| 상황 | 결과 |
+| --- | --- |
+| `data-ebs/terraform.tfstate` 파일이 없다 | `Unable to find remote state` 에러로 실패한다. |
+| state 파일은 있지만 `data_volume_id` output이 없다 (apply 전, 또는 destroy 후) | `This object does not have an attribute named "data_volume_id"` 에러로 실패한다. |
+| 상위 `infra`에 리소스가 남은 상태에서 state 파일이 없다 | `terraform destroy`도 `Unable to find remote state`로 실패한다. `terraform destroy -refresh=false`로는 정리된다. |
+
+두 에러 모두 `data-ebs`를 먼저 apply하면 해결된다. 상위 `infra`를 destroy하기 전에는
+`data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다.
 
 ## Data EBS와 Compose 연결
 

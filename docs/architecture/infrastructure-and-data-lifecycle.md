@@ -16,7 +16,7 @@ infra/data-ebs/
 
 EC2의 Root EBS에는 OS, Docker, 애플리케이션처럼 재구성 가능한 실행 환경이 놓인다. Root EBS는 EC2 종료 시 함께 삭제되도록 구성돼 있다. SQLite 서비스 데이터는 별도 Data EBS에 둔다.
 
-EC2 layer는 Data EBS를 새로 만들지 않고 `data_volume_id`로 기존 볼륨을 조회해 attachment만 관리한다. Data EBS layer는 별도 state와 `prevent_destroy`로 이 볼륨을 보존한다. EC2는 Data EBS와 같은 Availability Zone의 subnet에서 생성된다.
+EC2 layer는 Data EBS를 새로 만들지 않고, `terraform_remote_state`로 Data EBS layer state의 `data_volume_id` output을 읽어 기존 볼륨을 조회한 뒤 attachment만 관리한다. 그래서 Data EBS layer를 먼저 apply해야 EC2 layer가 동작한다. Data EBS layer는 별도 state와 `prevent_destroy`로 이 볼륨을 보존한다. EC2는 Data EBS와 같은 Availability Zone의 subnet에서 생성된다.
 
 ## Data EBS 준비와 연결
 
@@ -31,7 +31,7 @@ EC2용 Compose 파일은 이 host 경로를 backend의 `/app/data`에 bind mount
 
 ## EC2 교체 시 경계
 
-EC2 layer를 교체해도 Data EBS가 보존되어 있고 같은 `data_volume_id`를 다시 전달하면, 새 EC2는 그 볼륨을 다시 attach하고 기존 filesystem을 유지한 채 mount하도록 구성돼 있다.
+EC2 layer를 교체해도 Data EBS와 Data EBS layer state가 보존되어 있으면, 새 EC2는 그 볼륨을 다시 attach하고 기존 filesystem을 유지한 채 mount하도록 구성돼 있다.
 
 이 경계가 보존하려는 것은 Data EBS 안의 SQLite 데이터와 filesystem이다. EC2와 Root EBS에 있던 OS, Docker 설치 상태, application checkout, host 설정은 새 EC2에 남지 않는다. Data EBS가 보존된다고 애플리케이션 실행 환경 전체가 복구되는 것은 아니다.
 
