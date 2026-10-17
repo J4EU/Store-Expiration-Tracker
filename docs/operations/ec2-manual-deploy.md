@@ -157,6 +157,8 @@ openssl rand -hex 32
 
 secret 원문은 Git, 문서, 이슈, PR, 채팅에 남기지 않는다.
 
+`deploy/prod/backend.env`는 AI 에이전트가 읽을 수 있는 범위에서 벗어나도록 로컬에 두지 않고 EC2에서만 작성한다([Issue #65](https://github.com/J4EU/Store-Expiration-Tracker/issues/65)).
+
 **HTTP 테스트 한정 예외:** 현재 EC2는 HTTP로만 열려 있다. `SESSION_COOKIE_SECURE=true`를 유지하면 브라우저가 HTTP에서 session cookie를 보내지 않아 로그인 뒤 요청이 `401`로 실패한다([EC2 Compose 검증 스파이크](../../infra/compose-spike.md)). EC2를 띄워 테스트할 때만 아래처럼 바꾼다.
 
 ```text
