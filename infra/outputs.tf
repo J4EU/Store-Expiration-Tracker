@@ -4,8 +4,8 @@ output "instance_id" {
 }
 
 output "public_ip" {
-  description = "Public IPv4 address used for SSH and application access."
-  value       = aws_instance.deployment.public_ip
+  description = "Elastic IP address associated with the deployment host for SSH and application access."
+  value       = aws_eip_association.deployment.public_ip
 }
 
 output "security_group_id" {

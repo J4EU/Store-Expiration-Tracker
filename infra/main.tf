@@ -37,6 +37,14 @@ data "terraform_remote_state" "data_ebs" {
   }
 }
 
+data "terraform_remote_state" "eip" {
+  backend = "local"
+
+  config = {
+    path = "${path.module}/eip/terraform.tfstate"
+  }
+}
+
 data "aws_ebs_volume" "sqlite_data" {
   filter {
     name   = "volume-id"
@@ -120,4 +128,9 @@ resource "aws_volume_attachment" "sqlite_data" {
   device_name = "/dev/sdf"
   instance_id = aws_instance.deployment.id
   volume_id   = data.aws_ebs_volume.sqlite_data.id
+}
+
+resource "aws_eip_association" "deployment" {
+  allocation_id = data.terraform_remote_state.eip.outputs.allocation_id
+  instance_id   = aws_instance.deployment.id
 }
