@@ -46,7 +46,25 @@ terraform -chdir=infra/data-ebs apply
 terraform -chdir=infra/data-ebs output data_volume_id
 ```
 
-### 2-2. EC2 생성
+### 2-2. EIP 준비
+
+기존 EIP를 다시 쓰는 경우 새로 만들지 않는다. `allocation_id` output이 있는지만 확인한다.
+
+```bash
+terraform -chdir=infra/eip output allocation_id
+```
+
+EIP가 아직 없을 때만 새로 만든다. 필수 변수가 없어 `terraform.tfvars`는 만들지 않는다.
+
+```bash
+terraform -chdir=infra/eip init
+terraform -chdir=infra/eip apply
+terraform -chdir=infra/eip output public_ip
+```
+
+이 주소가 서비스의 고정 공인 IP다. 한 번 destroy한 EIP 주소는 다시 받을 수 없으므로 `infra/eip`는 destroy하지 않는다.
+
+### 2-3. EC2 생성
 
 `infra/terraform.tfvars`가 없으면 예시 파일을 복사한다.
 
@@ -62,7 +80,7 @@ cp infra/terraform.tfvars.example infra/terraform.tfvars
   curl -s https://checkip.amazonaws.com
   ```
 
-Data EBS 볼륨 ID는 입력하지 않는다. EC2 레이어가 `infra/data-ebs/terraform.tfstate`에서 `data_volume_id` output을 읽는다. 그래서 2-1을 먼저 끝내야 한다.
+Data EBS 볼륨 ID와 EIP allocation ID는 입력하지 않는다. EC2 레이어가 `infra/data-ebs/terraform.tfstate`의 `data_volume_id`와 `infra/eip/terraform.tfstate`의 `allocation_id` output을 읽는다. 그래서 2-1과 2-2를 먼저 끝내야 한다.
 
 ```bash
 terraform -chdir=infra init
@@ -205,14 +223,7 @@ sudo ls -l /srv/store-expiration-tracker/data
 
 ## 9. EC2 stop/start 후 재기동
 
-EC2를 start해도 컨테이너는 자동으로 시작되지 않는다. Elastic IP가 없으므로 public IP도 바뀔 수 있다.
-
-[로컬] 새 public IP를 확인한다. `terraform output`은 state를 갱신해야 새 IP를 보여 준다.
-
-```bash
-terraform -chdir=infra apply -refresh-only
-terraform -chdir=infra output public_ip
-```
+EC2를 start해도 컨테이너는 자동으로 시작되지 않는다. public IP는 EIP이므로 stop/start 뒤에도 바뀌지 않는다.
 
 [EC2] SSH로 접속해 mount를 확인한 뒤 실행한다.
 
@@ -240,7 +251,9 @@ docker compose -f compose.ec2.yaml up --build --wait
 terraform -chdir=infra destroy
 ```
 
-EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data-ebs`의 별도 state에 있어 남는다. 다음 배포에서 EC2 레이어가 `infra/data-ebs` state의 `data_volume_id`를 읽어 다시 연결한다. `infra/data-ebs`는 destroy하지 않는다. EC2 레이어의 destroy도 `infra/data-ebs/terraform.tfstate`를 읽으므로, 이 파일을 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
+EC2, 보안 그룹, Data EBS attachment, EIP association만 삭제된다. Data EBS와 EIP는 각각 `infra/data-ebs`, `infra/eip`의 별도 state에 있어 남는다. 다음 배포에서 EC2 레이어가 두 state의 output을 읽어 다시 연결하므로, 새 EC2도 같은 public IP를 쓴다. `infra/data-ebs`와 `infra/eip`는 destroy하지 않는다. EC2 레이어의 destroy도 두 state 파일을 읽으므로, 이 파일들을 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
+
+EIP는 EC2가 없는 동안에도 공인 IPv4 요금이 부과된다.
 
 ## 12. 문제 해결
 
@@ -248,8 +261,9 @@ EC2, 보안 그룹, Data EBS attachment만 삭제된다. Data EBS는 `infra/data
 | --- | --- |
 | Compose가 `deploy/prod/backend.env not found`로 실행을 거부한다 | 6단계의 env 파일을 만들지 않았다. |
 | 로그인은 되는데 이후 요청이 `401`이다 | HTTP에서 `SESSION_COOKIE_SECURE=true`다. 6단계의 테스트 예외를 확인하고 재실행한다. |
-| 2-2의 `plan`/`apply`가 `Unable to find remote state`로 실패한다 | `infra/data-ebs/terraform.tfstate`가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
-| 2-2의 `plan`/`apply`가 `This object does not have an attribute named "data_volume_id"`로 실패한다 | `infra/data-ebs` state는 있지만 Data EBS가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
+| 2-3의 `plan`/`apply`가 `Unable to find remote state`로 실패한다 | `infra/data-ebs/terraform.tfstate` 또는 `infra/eip/terraform.tfstate`가 없다. 에러가 가리키는 경로에 따라 2-1 또는 2-2를 먼저 apply한다. |
+| 2-3의 `plan`/`apply`가 `This object does not have an attribute named "data_volume_id"`로 실패한다 | `infra/data-ebs` state는 있지만 Data EBS가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
+| 2-3의 `plan`/`apply`가 `This object does not have an attribute named "allocation_id"`로 실패한다 | `infra/eip` state는 있지만 EIP가 없다. 2-2에서 EIP를 먼저 apply한다. |
 | `up`할 때 80 포트가 이미 사용 중이다 | 이전 프로젝트 이름으로 실행한 스택이 남아 있다. `docker compose -p store-expiration-tracker-local -f compose.ec2.yaml down`으로 내린 뒤 다시 실행한다. ([PR #66](https://github.com/J4EU/Store-Expiration-Tracker/pull/66)) |
 | SSH나 HTTP(`80`) 접속이 timeout된다 | 현재 공인 IP가 `allowed_operator_cidrs`에 없다. 값을 갱신하고 `terraform -chdir=infra apply`를 다시 실행한다. |
 | `findmnt` 출력이 없다 | user data가 아직 실행 중이거나 실패했다. `/var/log/cloud-init-output.log`를 확인한다. |

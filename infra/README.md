@@ -1,20 +1,24 @@
 # EC2 배포 인프라
 
 이 디렉터리는 Store Expiration Tracker를 EC2에서 실행하기 위한 AWS 리소스를
-Terraform으로 관리한다. 구성은 아래 두 레이어로 나뉜다.
+Terraform으로 관리한다. 구성은 아래 세 레이어로 나뉜다.
 
 ```text
 infra/data-ebs/ (Data EBS state) -- data_volume_id --> infra/ (EC2 state)
-                                                        └─ EC2에 Data EBS 연결
+infra/eip/      (EIP state)      -- allocation_id  -->  ├─ EC2에 Data EBS 연결
+                                                        └─ EC2에 EIP 연결
 ```
 
 - `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS만 생성하고 보존한다.
-- 이 디렉터리의 상위 `infra` 레이어는 EC2·보안 그룹·Data EBS를 EC2에 연결하는
-  attachment를 관리한다. Data EBS는 새로 만들지 않고, `terraform_remote_state`로
-  `data-ebs` state의 `data_volume_id` output을 읽어 조회한다.
+- `eip` 레이어는 도메인 A 레코드에 등록할 고정 공인 IPv4인 Elastic IP만 생성하고
+  보존한다.
+- 이 디렉터리의 상위 `infra` 레이어는 EC2·보안 그룹과, Data EBS·EIP를 EC2에 연결하는
+  attachment·association을 관리한다. Data EBS와 EIP는 새로 만들지 않고,
+  `terraform_remote_state`로 각 레이어 state의 output을 읽어 사용한다.
 
-따라서 EC2를 교체해도 같은 Data EBS를 다시 연결할 수 있고, 두 레이어의 Terraform
-state도 분리된다.
+따라서 EC2를 교체해도 같은 Data EBS와 같은 공인 IP를 다시 연결할 수 있고, 세 레이어의
+Terraform state도 분리된다. 보존 레이어는 EC2 레이어를 참조하지 않는다. EC2 레이어만
+보존 레이어를 읽으므로 의존 방향은 한쪽으로만 흐른다.
 
 EC2 내부의 Docker 설치와 애플리케이션 배포는 운영자가 직접 수행한다. Data EBS의
 파일시스템 생성과 마운트는 EC2 `user_data`가 담당한다. Terraform은 AWS 리소스 관계와
@@ -28,6 +32,7 @@ Terraform은 이를 그대로 EC2에 전달한다.
 - default VPC의 default subnet에 Amazon Linux 2023 `t3.micro` EC2 1대
 - `allowed_operator_cidrs`에 등록한 집·편의점 공인 IP에만 SSH(`22`)와 Nginx(`80`)를 허용하는 보안 그룹
 - `data-ebs` 레이어에서 생성하는 20GB `gp3` Data EBS 1개
+- `eip` 레이어에서 생성하는 Elastic IP 1개
 
 이 구성은 선택한 AWS 리전에 default VPC와 default subnet이 있고, `key_pair_name`에
 지정한 EC2 키 페어가 이미 존재한다는 전제를 둔다.
@@ -48,17 +53,23 @@ Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 ## 적용 준비
 
 아래 명령은 이 README가 있는 `infra/` 디렉터리에서 실행한다. 처음 구성할 때는
-EC2 레이어가 연결할 대상이 먼저 필요하므로 Data EBS를 먼저 만든다.
+EC2 레이어가 연결할 대상이 먼저 필요하므로 Data EBS와 EIP를 먼저 만든다.
 
 ```bash
 cd data-ebs
 cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
+cd ../eip
+terraform init
+terraform apply
 ```
 
-상위 `infra` 레이어는 `data-ebs/terraform.tfstate`의 `data_volume_id` output을 읽어
-기존 Data EBS를 조회하고 attachment를 만든다. 볼륨 ID는 직접 입력하지 않는다.
+`eip` 레이어는 필수 변수가 없어 `terraform.tfvars`를 만들지 않는다.
+
+상위 `infra` 레이어는 `data-ebs/terraform.tfstate`의 `data_volume_id` output과
+`eip/terraform.tfstate`의 `allocation_id` output을 읽어 attachment와 association을
+만든다. 볼륨 ID와 EIP allocation ID는 직접 입력하지 않는다.
 상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 집·편의점 공인 IPv4 CIDR 목록을
 입력한다.
 
@@ -96,7 +107,8 @@ terraform plan
 terraform apply
 ```
 
-apply 뒤에는 `terraform output public_ip`로 확인한 주소로 EC2에 접속한다.
+apply 뒤에는 `terraform output public_ip`로 확인한 주소로 EC2에 접속한다. 이 주소는
+EC2에 연결된 EIP이므로 EC2를 stop/start하거나 교체해도 바뀌지 않는다.
 `terraform output data_volume_id`가 `data-ebs` 레이어의 출력과 같은지도 확인한다.
 
 ### Data EBS state를 읽지 못할 때
@@ -111,7 +123,9 @@ apply 뒤에는 `terraform output public_ip`로 확인한 주소로 EC2에 접�
 | 상위 `infra`에 리소스가 남은 상태에서 state 파일이 없다 | `terraform destroy`도 `Unable to find remote state`로 실패한다. `terraform destroy -refresh=false`로는 정리된다. |
 
 두 에러 모두 `data-ebs`를 먼저 apply하면 해결된다. 상위 `infra`를 destroy하기 전에는
-`data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다.
+`data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다. `eip` 레이어도 같은 방식으로
+remote state를 읽으므로, `eip/terraform.tfstate`와 `allocation_id` output에 대해 같은
+규칙이 적용된다.
 
 ## Data EBS와 Compose 연결
 
@@ -171,9 +185,13 @@ sudo tail -n 100 /var/log/cloud-init-output.log
 재포맷하지 않고 재연결한 것이다. `infra/data-ebs` 레이어는 이 검증에서 destroy하지
 않는다.
 
-EC2 레이어에서 `terraform destroy`를 실행하면 attachment, EC2, 보안 그룹만 삭제된다.
-Data EBS는 별도 `data-ebs` state에 있으므로 남는다. Data EBS를 폐기해야 할 때만
-`data-ebs` 레이어의 보호 설정을 검토한 뒤 별도로 정리한다.
+EC2 레이어에서 `terraform destroy`를 실행하면 attachment, association, EC2, 보안 그룹만
+삭제된다. Data EBS와 EIP는 별도 state에 있으므로 남는다. Data EBS나 EIP를 폐기해야 할
+때만 해당 레이어의 보호 설정을 검토한 뒤 별도로 정리한다.
+
+EIP는 EC2에 연결되지 않은 동안에도 공인 IPv4 요금이 계속 부과된다. 또 한 번 destroy한
+EIP 주소는 AWS에 반납되어 다시 받을 수 없으므로, 도메인 A 레코드에 등록한 뒤에는
+`eip` 레이어의 `prevent_destroy`를 유지한다.
 
 ## 관련 기록
 
