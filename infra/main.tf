@@ -90,6 +90,14 @@ resource "aws_security_group" "deployment" {
     cidr_blocks = var.allowed_operator_cidrs
   }
 
+  ingress {
+    description = "Nginx HTTPS access from approved operator networks"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_operator_cidrs
+  }
+
   egress {
     description = "Outbound access for manual host setup"
     from_port   = 0
