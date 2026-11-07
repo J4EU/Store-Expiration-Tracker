@@ -1,14 +1,18 @@
 # EC2 배포 인프라
 
 이 디렉터리는 Store Expiration Tracker를 EC2에서 실행하기 위한 AWS 리소스를
-Terraform으로 관리한다. 구성은 아래 세 레이어로 나뉜다.
+Terraform으로 관리한다. 구성은 아래 네 레이어로 나뉜다.
 
 ```text
+infra/state-bucket/ (로컬 state) -- S3 버킷: 아래 세 레이어의 state 저장
+
 infra/data-ebs/ (Data EBS state) -- data_volume_id --> infra/ (EC2 state)
 infra/eip/      (EIP state)      -- allocation_id  -->  ├─ EC2에 Data EBS 연결
                                                         └─ EC2에 EIP 연결
 ```
 
+- `state-bucket` 레이어는 나머지 세 레이어의 Terraform state를 저장할 S3 버킷만 생성하고
+  보존한다.
 - `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS만 생성하고 보존한다.
 - `eip` 레이어는 도메인 A 레코드에 등록할 고정 공인 IPv4인 Elastic IP만 생성하고
   보존한다.
@@ -16,7 +20,7 @@ infra/eip/      (EIP state)      -- allocation_id  -->  ├─ EC2에 Data EBS �
   attachment·association을 관리한다. Data EBS와 EIP는 새로 만들지 않고,
   `terraform_remote_state`로 각 레이어 state의 output을 읽어 사용한다.
 
-따라서 EC2를 교체해도 같은 Data EBS와 같은 공인 IP를 다시 연결할 수 있고, 세 레이어의
+따라서 EC2를 교체해도 같은 Data EBS와 같은 공인 IP를 다시 연결할 수 있고, 각 레이어의
 Terraform state도 분리된다. 보존 레이어는 EC2 레이어를 참조하지 않는다. EC2 레이어만
 보존 레이어를 읽으므로 의존 방향은 한쪽으로만 흐른다.
 
@@ -33,6 +37,7 @@ Terraform은 이를 그대로 EC2에 전달한다.
 - `allowed_operator_cidrs`에 등록한 집·편의점 공인 IP에만 SSH(`22`)와 Nginx(`80`)를 허용하는 보안 그룹
 - `data-ebs` 레이어에서 생성하는 20GB `gp3` Data EBS 1개
 - `eip` 레이어에서 생성하는 Elastic IP 1개
+- `state-bucket` 레이어에서 생성하는 Terraform state용 S3 버킷 1개
 
 이 구성은 선택한 AWS 리전에 default VPC와 default subnet이 있고, `key_pair_name`에
 지정한 EC2 키 페어가 이미 존재한다는 전제를 둔다.
@@ -50,13 +55,40 @@ Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 이 구성이 선택된 이유와 데이터 보존·복구·복원의 구분은
 [Data EBS Lifecycle](../docs/decisions/data-ebs-lifecycle.md)에 정리한다.
 
+## Terraform state 저장 위치
+
+`infra`, `data-ebs`, `eip` 레이어의 state는 S3 버킷
+`j4eu-store-expiration-tracker-tfstate`에 레이어별 key로 저장한다.
+
+| 레이어 | state 위치 |
+| --- | --- |
+| `state-bucket` | 로컬 `infra/state-bucket/terraform.tfstate` |
+| `data-ebs` | S3 `data-ebs/terraform.tfstate` |
+| `eip` | S3 `eip/terraform.tfstate` |
+| `infra` | S3 `infra/terraform.tfstate` |
+
+버킷은 versioning으로 이전 state 버전을 보관하고, SSE-S3 암호화와 공개 차단을 켠다.
+동시 실행은 `use_lockfile = true`로 S3 lock 파일을 만들어 막는다. 버킷에는
+`prevent_destroy`를 건다.
+
+backend 블록에는 변수를 쓸 수 없어서, 각 레이어의 `backend "s3"`와
+`terraform_remote_state`에 버킷 이름을 직접 적는다. 버킷 이름을 바꾸면 이 값도 함께
+바꾼다.
+
+`state-bucket` 레이어의 state는 버킷을 만드는 주체라 로컬에 둔다. 이 state를 잃어도 버킷과
+state 3개는 그대로 남아 서비스에 영향이 없고, `terraform import`로 다시 연결할 수 있다.
+
 ## 적용 준비
 
 아래 명령은 이 README가 있는 `infra/` 디렉터리에서 실행한다. 처음 구성할 때는
-EC2 레이어가 연결할 대상이 먼저 필요하므로 Data EBS와 EIP를 먼저 만든다.
+state를 저장할 S3 버킷이 먼저 필요하고, EC2 레이어가 연결할 대상도 필요하므로 버킷,
+Data EBS, EIP 순서로 만든다.
 
 ```bash
-cd data-ebs
+cd state-bucket
+terraform init
+terraform apply
+cd ../data-ebs
 cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
@@ -67,8 +99,8 @@ terraform apply
 
 `eip` 레이어는 필수 변수가 없어 `terraform.tfvars`를 만들지 않는다.
 
-상위 `infra` 레이어는 `data-ebs/terraform.tfstate`의 `data_volume_id` output과
-`eip/terraform.tfstate`의 `allocation_id` output을 읽어 attachment와 association을
+상위 `infra` 레이어는 S3의 `data-ebs/terraform.tfstate`에서 `data_volume_id` output을,
+`eip/terraform.tfstate`에서 `allocation_id` output을 읽어 attachment와 association을
 만든다. 볼륨 ID와 EIP allocation ID는 직접 입력하지 않는다.
 상위 디렉터리의 `terraform.tfvars.example`을 복사한 뒤, 집·편의점 공인 IPv4 CIDR 목록을
 입력한다.
@@ -80,6 +112,9 @@ cp terraform.tfvars.example terraform.tfvars
 
 `terraform.tfvars`는 Git에 포함하지 않는다. SSH에 사용할 기존 키 페어는
 `key_pair_name`으로 지정하며, 기본값은 `j4eu-ec2`다.
+
+아래 절차는 로컬 backend를 쓰던 때의 기록이다. S3 backend에서는 `-state-out` 경로를
+그대로 쓸 수 없다.
 
 위 순서는 새 구성을 위한 것이다. 이전에 상위 `infra` state 안에서 Data EBS를 이미
 만들었다면 새 볼륨을 만들지 않는다. 기존 Data EBS 리소스의 state 소유권만 `data-ebs`
@@ -114,16 +149,17 @@ EC2에 연결된 EIP이므로 EC2를 stop/start하거나 교체해도 바뀌지 
 ### Data EBS state를 읽지 못할 때
 
 `data-ebs` state를 읽지 못하면 상위 `infra` 레이어는 plan 단계에서 멈춘다. 볼륨 없이
-진행되지는 않는다. 임시 디렉터리에서 Terraform `1.15.8`로 확인한 동작은 아래와 같다.
+진행되지는 않는다. 아래 표는 로컬 backend일 때 임시 디렉터리에서 Terraform `1.15.8`로
+확인한 동작이다. 첫 번째 행은 S3 backend에서 Terraform `1.17.1`로 다시 확인했다.
 
 | 상황 | 결과 |
 | --- | --- |
-| `data-ebs/terraform.tfstate` 파일이 없다 | `Unable to find remote state` 에러로 실패한다. |
+| S3에 `data-ebs/terraform.tfstate`가 없다 | `Unable to find remote state` 에러로 실패한다. |
 | state 파일은 있지만 `data_volume_id` output이 없다 (apply 전, 또는 destroy 후) | `This object does not have an attribute named "data_volume_id"` 에러로 실패한다. |
 | 상위 `infra`에 리소스가 남은 상태에서 state 파일이 없다 | `terraform destroy`도 `Unable to find remote state`로 실패한다. `terraform destroy -refresh=false`로는 정리된다. |
 
 두 에러 모두 `data-ebs`를 먼저 apply하면 해결된다. 상위 `infra`를 destroy하기 전에는
-`data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다. `eip` 레이어도 같은 방식으로
+S3의 `data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다. `eip` 레이어도 같은 방식으로
 remote state를 읽으므로, `eip/terraform.tfstate`와 `allocation_id` output에 대해 같은
 규칙이 적용된다.
 
