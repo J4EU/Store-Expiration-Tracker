@@ -42,6 +42,17 @@ Terraform은 이를 그대로 EC2에 전달한다.
 이 구성은 선택한 AWS 리전에 default VPC와 default subnet이 있고, `key_pair_name`에
 지정한 EC2 키 페어가 이미 존재한다는 전제를 둔다.
 
+EC2 AMI는 `ami_id` 변수로 고정한다. 최신 AMI를 자동으로 따라가면 AWS가 새 AMI를 공개한
+뒤의 apply에서 EC2와 Root EBS가 교체되고, Root EBS에 있는 인증서도 함께 사라진다.
+AMI를 바꾸려면 `ami_id` 값을 바꿔 커밋하고 apply한다. 이때 EC2가 교체되므로 인증서를
+다시 준비해야 한다. 현재 AMI의 OS 패키지는 EC2 안에서 `dnf`로 갱신할 수 있고, 이 경우
+`ami_id`는 바꾸지 않는다. 고정한 AMI의 deprecated 예정일은 아래 명령으로 확인한다.
+
+```bash
+aws ec2 describe-images --image-ids <ami_id> \
+  --query 'Images[0].[Name,DeprecationTime]' --output text
+```
+
 | 구분     | 저장 대상                | 수명 주기             |
 | -------- | ------------------------ | --------------------- |
 | Root EBS | OS, Docker, 애플리케이션 | EC2 종료 시 함께 삭제 |

@@ -16,6 +16,13 @@ variable "key_pair_name" {
   default     = "j4eu-ec2"
 }
 
+variable "ami_id" {
+  description = "Pinned Amazon Linux 2023 AMI for the deployment host. Changing it replaces the EC2 instance and its root volume."
+  type        = string
+  # al2023-ami-2023.12.20261026.1-kernel-6.18-x86_64 (ap-northeast-2)
+  default = "ami-0ee840e948c0ac14b"
+}
+
 variable "instance_type" {
   description = "EC2 instance type for the deployment host."
   type        = string
