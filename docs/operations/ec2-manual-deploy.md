@@ -379,7 +379,7 @@ docker compose -f compose.ec2.yaml up -d --force-recreate backend
 terraform -chdir=infra destroy
 ```
 
-EC2, 보안 그룹, Data EBS attachment, EIP association만 삭제된다. Data EBS와 EIP는 각각 `infra/data-ebs`, `infra/eip`의 별도 state에 있어 남는다. 다음 배포에서 EC2 레이어가 두 state의 output을 읽어 다시 연결하므로, 새 EC2도 같은 public IP를 쓴다. `infra/data-ebs`와 `infra/eip`는 destroy하지 않는다. EC2 레이어의 destroy도 S3의 두 state를 읽으므로, 이 state를 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
+EC2, 보안 그룹, Data EBS attachment, EIP association만 삭제된다. Data EBS와 EIP는 삭제되지 않는다. 두 리소스는 각각 `infra/data-ebs`, `infra/eip` 레이어가 따로 관리하므로 EC2 레이어의 destroy 대상이 아니다. 다음 배포에서 EC2 레이어가 두 state의 output을 읽어 다시 연결하므로, 새 EC2도 같은 public IP를 쓴다. `infra/data-ebs`와 `infra/eip`는 destroy하지 않는다. EC2 레이어의 destroy도 S3의 두 state를 읽으므로, 이 state를 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
 
 EC2의 루트 볼륨도 함께 삭제되므로 `/etc/letsencrypt`의 인증서도 사라진다. 다음 배포에서는 6단계로 인증서를 다시 발급한다.
 
