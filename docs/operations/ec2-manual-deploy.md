@@ -32,6 +32,23 @@
 
 저장소 최상위에서 시작한다.
 
+### 2-0. Terraform state 버킷 준비
+
+`infra`, `infra/data-ebs`, `infra/eip`의 state는 S3 버킷에 있다. 기존 버킷을 다시 쓰는 경우 새로 만들지 않는다. 버킷이 있는지만 확인한다.
+
+```bash
+aws s3api head-bucket --bucket j4eu-store-expiration-tracker-tfstate
+```
+
+버킷이 아직 없을 때만 새로 만든다.
+
+```bash
+terraform -chdir=infra/state-bucket init
+terraform -chdir=infra/state-bucket apply
+```
+
+새 환경에서는 각 레이어의 `output`을 읽기 전에 `terraform -chdir=<레이어> init`을 먼저 실행한다.
+
 ### 2-1. Data EBS 준비
 
 기존 Data EBS를 다시 쓰는 경우 새로 만들지 않는다. `data_volume_id` output이 있는지만 확인한다.
@@ -84,7 +101,7 @@ cp infra/terraform.tfvars.example infra/terraform.tfvars
   curl -s https://checkip.amazonaws.com
   ```
 
-Data EBS 볼륨 ID와 EIP allocation ID는 입력하지 않는다. EC2 레이어가 `infra/data-ebs/terraform.tfstate`의 `data_volume_id`와 `infra/eip/terraform.tfstate`의 `allocation_id` output을 읽는다. 그래서 2-1과 2-2를 먼저 끝내야 한다.
+Data EBS 볼륨 ID와 EIP allocation ID는 입력하지 않는다. EC2 레이어가 S3의 `data-ebs/terraform.tfstate`에서 `data_volume_id`를, `eip/terraform.tfstate`에서 `allocation_id` output을 읽는다. 그래서 2-1과 2-2를 먼저 끝내야 한다.
 
 ```bash
 terraform -chdir=infra init
@@ -362,7 +379,7 @@ docker compose -f compose.ec2.yaml up -d --force-recreate backend
 terraform -chdir=infra destroy
 ```
 
-EC2, 보안 그룹, Data EBS attachment, EIP association만 삭제된다. Data EBS와 EIP는 각각 `infra/data-ebs`, `infra/eip`의 별도 state에 있어 남는다. 다음 배포에서 EC2 레이어가 두 state의 output을 읽어 다시 연결하므로, 새 EC2도 같은 public IP를 쓴다. `infra/data-ebs`와 `infra/eip`는 destroy하지 않는다. EC2 레이어의 destroy도 두 state 파일을 읽으므로, 이 파일들을 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
+EC2, 보안 그룹, Data EBS attachment, EIP association만 삭제된다. Data EBS와 EIP는 삭제되지 않는다. 두 리소스는 각각 `infra/data-ebs`, `infra/eip` 레이어가 따로 관리하므로 EC2 레이어의 destroy 대상이 아니다. 다음 배포에서 EC2 레이어가 두 state의 output을 읽어 다시 연결하므로, 새 EC2도 같은 public IP를 쓴다. `infra/data-ebs`와 `infra/eip`는 destroy하지 않는다. EC2 레이어의 destroy도 S3의 두 state를 읽으므로, 이 state를 지우거나 옮기기 전에 EC2 레이어를 먼저 정리한다.
 
 EC2의 루트 볼륨도 함께 삭제되므로 `/etc/letsencrypt`의 인증서도 사라진다. 다음 배포에서는 6단계로 인증서를 다시 발급한다.
 
@@ -376,7 +393,7 @@ EIP는 EC2가 없는 동안에도 공인 IPv4 요금이 부과된다.
 | `up`할 때 nginx가 시작하지 못한다 | `/etc/letsencrypt/live/store.j4eu.dev/`에 인증서가 없다. 6단계로 인증서를 발급한다. `docker compose -f compose.ec2.yaml logs nginx`로 원인을 확인한다. |
 | `backend.env`를 바꿨는데 반영되지 않는다 | `restart`는 env_file을 다시 읽지 않는다. 11단계처럼 `--force-recreate`로 backend를 다시 만든다. |
 | IP로 HTTPS 접속하면 인증서 오류가 난다 | 인증서는 `store.j4eu.dev`용이다. IP가 아니라 도메인으로 접속한다. |
-| 2-3의 `plan`/`apply`가 `Unable to find remote state`로 실패한다 | `infra/data-ebs/terraform.tfstate` 또는 `infra/eip/terraform.tfstate`가 없다. 에러가 가리키는 경로에 따라 2-1 또는 2-2를 먼저 apply한다. |
+| 2-3의 `plan`/`apply`가 `Unable to find remote state`로 실패한다 | S3에 `data-ebs/terraform.tfstate` 또는 `eip/terraform.tfstate`가 없다. 에러가 가리키는 경로에 따라 2-1 또는 2-2를 먼저 apply한다. |
 | 2-3의 `plan`/`apply`가 `This object does not have an attribute named "data_volume_id"`로 실패한다 | `infra/data-ebs` state는 있지만 Data EBS가 없다. 2-1에서 Data EBS를 먼저 apply한다. |
 | 2-3의 `plan`/`apply`가 `This object does not have an attribute named "allocation_id"`로 실패한다 | `infra/eip` state는 있지만 EIP가 없다. 2-2에서 EIP를 먼저 apply한다. |
 | `up`할 때 80 포트가 이미 사용 중이다 | 이전 프로젝트 이름으로 실행한 스택이 남아 있다. `docker compose -p store-expiration-tracker-local -f compose.ec2.yaml down`으로 내린 뒤 다시 실행한다. ([PR #66](https://github.com/J4EU/Store-Expiration-Tracker/pull/66)) |

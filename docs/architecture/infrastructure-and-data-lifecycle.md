@@ -4,14 +4,22 @@
 
 ## 책임 경계
 
-현재 인프라는 두 Terraform state로 나뉜다.
+현재 인프라는 4개의 Terraform state로 나뉜다. `infra/`, `infra/data-ebs/`, `infra/eip/`의 state는 S3 버킷에 저장하고, 그 버킷을 관리하는 `infra/state-bucket/`의 state만 로컬에 둔다.
 
 ```text
+infra/state-bucket/
+  -> Terraform state용 S3 버킷 생성과 보존
+
 infra/data-ebs/
   -> SQLite Data EBS 생성과 보존
   -> data_volume_id
   -> infra/
-       -> EC2, security group, 기존 Data EBS attachment
+       -> EC2, security group, 기존 Data EBS attachment, EIP association
+
+infra/eip/
+  -> Elastic IP 생성과 보존
+  -> allocation_id
+  -> infra/
 ```
 
 EC2의 Root EBS에는 OS, Docker, 애플리케이션처럼 재구성 가능한 실행 환경이 놓인다. Root EBS는 EC2 종료 시 함께 삭제되도록 구성돼 있다. SQLite 서비스 데이터는 별도 Data EBS에 둔다.

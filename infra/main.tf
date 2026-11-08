@@ -1,6 +1,14 @@
 terraform {
   required_version = ">= 1.15.0, < 2.0.0"
 
+  backend "s3" {
+    bucket       = "j4eu-store-expiration-tracker-tfstate"
+    key          = "infra/terraform.tfstate"
+    region       = "ap-northeast-2"
+    encrypt      = true
+    use_lockfile = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -17,10 +25,6 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_ssm_parameter" "amazon_linux_2023" {
-  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
-}
-
 locals {
   subnet_id = sort(data.aws_subnets.data_volume_availability_zone.ids)[0]
 }
@@ -30,18 +34,22 @@ data "aws_subnet" "deployment" {
 }
 
 data "terraform_remote_state" "data_ebs" {
-  backend = "local"
+  backend = "s3"
 
   config = {
-    path = "${path.module}/data-ebs/terraform.tfstate"
+    bucket = "j4eu-store-expiration-tracker-tfstate"
+    key    = "data-ebs/terraform.tfstate"
+    region = "ap-northeast-2"
   }
 }
 
 data "terraform_remote_state" "eip" {
-  backend = "local"
+  backend = "s3"
 
   config = {
-    path = "${path.module}/eip/terraform.tfstate"
+    bucket = "j4eu-store-expiration-tracker-tfstate"
+    key    = "eip/terraform.tfstate"
+    region = "ap-northeast-2"
   }
 }
 
@@ -112,7 +120,7 @@ resource "aws_security_group" "deployment" {
 }
 
 resource "aws_instance" "deployment" {
-  ami                         = data.aws_ssm_parameter.amazon_linux_2023.value
+  ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = local.subnet_id
   key_name                    = var.key_pair_name
