@@ -89,6 +89,24 @@ backend 블록에는 변수를 쓸 수 없어서, 각 레이어의 `backend "s3"
 `state-bucket` 레이어의 state는 버킷을 만드는 주체라 로컬에 둔다. 이 state를 잃어도 버킷과
 state 3개는 그대로 남아 서비스에 영향이 없고, `terraform import`로 다시 연결할 수 있다.
 
+### `state-bucket` 로컬 state 복구
+
+state를 잃은 상태에서 `terraform plan`을 실행하면 버킷 리소스 4개를 새로 만들겠다는
+결과(`4 to add`)가 나온다. 버킷은 이미 있으므로 apply하지 않는다. 대신 아래처럼 4개
+리소스를 import한다. 네 리소스 모두 버킷 이름을 import ID로 쓴다.
+
+```bash
+cd state-bucket
+B=j4eu-store-expiration-tracker-tfstate
+terraform import aws_s3_bucket.tfstate $B
+terraform import aws_s3_bucket_versioning.tfstate $B
+terraform import aws_s3_bucket_server_side_encryption_configuration.tfstate $B
+terraform import aws_s3_bucket_public_access_block.tfstate $B
+terraform plan
+```
+
+마지막 `terraform plan`이 `No changes`이면 복구가 끝난 것이다.
+
 ## 적용 준비
 
 아래 명령은 이 README가 있는 `infra/` 디렉터리에서 실행한다. 처음 구성할 때는
