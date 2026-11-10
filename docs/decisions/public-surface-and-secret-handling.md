@@ -35,7 +35,7 @@ API 문서 UI는 local development에서는 구현 확인에 유용하지만, pr
 - `SESSION_SECRET`을 변경하면 기존 signed session은 모두 무효화된다.
 - `ADMIN_PASSWORD` 변경은 다음 애플리케이션 시작 시 운영자 계정 비밀번호에 반영된다.
 - 이 결정은 secret 저장·주입 기술을 확정하지 않는다. 실제 production에서 어떤 env 파일이나 주입 방식을 쓰는지는 repository만으로 확인되지 않는다.
-- Secure cookie production 정책에는 HTTPS가 필요하지만, 현재 repository의 EC2/Nginx 구성에는 TLS termination과 443 구성이 없다.
+- Secure cookie production 정책은 HTTPS에 의존한다. 현재 EC2용 Nginx 구성(`frontend/nginx.ec2.conf`)은 `443`에서 TLS를 종료하고 `80` 요청을 HTTPS로 리다이렉트한다.
 
 ## 재검토 조건
 

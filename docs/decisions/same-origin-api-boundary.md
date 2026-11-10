@@ -17,7 +17,7 @@ FastAPI route 자체를 `/api/...`로 바꾸지 않는다. local development에�
 
 - `/api`는 API를 숨기는 보안 장치가 아니라 경계 표기다. 보호는 backend 인증과 backend host port를 직접 공개하지 않는 구성에 의존한다.
 - reverse proxy 설정이 browser-facing API 경로의 일부가 되므로, prefix 전달이 바뀌면 frontend와 proxy를 함께 검증해야 한다.
-- 이 선택은 실제 production URL과 HTTPS가 이미 검증됐다는 뜻이 아니다. 현재 repository에는 TLS termination과 443 구성도 없다.
+- 이 선택은 HTTPS 구성과 별개다. TLS termination과 `443` 노출은 EC2용 Nginx 설정(`frontend/nginx.ec2.conf`)과 `compose.ec2.yaml`이 담당한다.
 
 SPA fallback의 현재 동작, `/api/health` 경로, local Vite 대응 구조는 [Application and Request Flow](../architecture/application-and-request-flow.md)에서 다룬다.
 
