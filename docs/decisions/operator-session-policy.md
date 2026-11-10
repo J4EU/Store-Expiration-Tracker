@@ -26,7 +26,7 @@ JWT도 stateless signed token으로 사용하면 개별 token을 즉시 무효�
 - 탈취된 signed cookie는 서버가 원래 브라우저에서 온 요청인지 구별할 수 없어 만료 전까지 replay될 수 있다.
 - `SESSION_SECRET`을 변경하면 기존 signed session은 모두 무효화된다.
 - 무활동 시간 기준 자동 로그아웃은 현재 구현하지 않는다.
-- production에서 Secure cookie 정책을 사용하려면 HTTPS가 필요하다. 현재 repository의 EC2/Nginx 구성에는 TLS termination이 없으므로, HTTPS는 이 정책을 실제 production에서 충족하기 위한 미완료 prerequisite다.
+- production의 Secure cookie 정책은 HTTPS에 의존한다. 현재 EC2/Nginx 구성은 `443`에서 TLS를 종료하고 HTTP 요청을 HTTPS로 리다이렉트하므로, HTTPS 구성이 깨지면 로그인 세션도 함께 동작하지 않는다.
 
 ## 재검토 조건
 

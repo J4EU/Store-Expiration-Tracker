@@ -4,7 +4,7 @@
 
 ## 배포 형태의 요청 흐름
 
-현재 Compose 구성에서 브라우저의 외부 진입점은 Nginx다. 현재 host 공개 포트는 `80`이며, 이 포트 번호 자체는 장기 정책이 아니라 현재 설정값이다.
+현재 Compose 구성에서 브라우저의 외부 진입점은 Nginx다. host 공개 포트는 로컬 Compose(`compose.yaml`)에서 `80`, EC2용 Compose(`compose.ec2.yaml`)에서 `80`과 `443`이다. EC2에서는 Nginx가 `443`에서 TLS를 종료하고, `80` 요청은 HTTPS로 리다이렉트한다. 이 포트 번호 자체는 장기 정책이 아니라 현재 설정값이다.
 
 ```text
 Browser
@@ -43,10 +43,10 @@ Vite도 `/api` prefix를 제거한 뒤 FastAPI의 기존 route로 전달한다. 
 
 ## 현재 확인 범위
 
-이 문서는 repository의 Compose, Nginx, FastAPI, frontend 설정으로 확인되는 구조만 설명한다. 실제 production URL, HTTPS, TLS termination, 실제 운영 환경변수 주입 여부는 이 repository만으로 확인되지 않는다.
+이 문서는 repository의 Compose, Nginx, FastAPI, frontend 설정으로 확인되는 구조만 설명한다. 실제 production URL, 실제 운영 환경변수 주입 여부는 이 repository만으로 확인되지 않는다.
 
 ## Source of truth
 
 - `compose.yaml`, `compose.ec2.yaml`
-- `frontend/nginx.conf`, `frontend/vite.config.js`, `frontend/src/api.js`
+- `frontend/nginx.conf`, `frontend/nginx.ec2.conf`, `frontend/vite.config.js`, `frontend/src/api.js`
 - `backend/app/main.py`, `backend/app/auth.py`, `backend/app/db.py`

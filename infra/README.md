@@ -34,7 +34,7 @@ Terraform은 이를 그대로 EC2에 전달한다.
 ## 구성
 
 - default VPC의 default subnet에 Amazon Linux 2023 `t3.micro` EC2 1대
-- `allowed_operator_cidrs`에 등록한 집·편의점 공인 IP에만 SSH(`22`)와 Nginx(`80`)를 허용하는 보안 그룹
+- `allowed_operator_cidrs`에 등록한 집·편의점 공인 IP에만 SSH(`22`)와 Nginx HTTP(`80`)·HTTPS(`443`)를 허용하는 보안 그룹
 - `data-ebs` 레이어에서 생성하는 20GB `gp3` Data EBS 1개
 - `eip` 레이어에서 생성하는 Elastic IP 1개
 - `state-bucket` 레이어에서 생성하는 Terraform state용 S3 버킷 1개
