@@ -57,7 +57,7 @@ EC2 layer를 교체해도 Data EBS와 Data EBS layer state가 보존되어 있�
 
 ## Source of truth
 
-- `infra/data-ebs/`
+- `infra/data-ebs/`, `infra/eip/`, `infra/state-bucket/`
 - `infra/main.tf`, `infra/variables.tf`, `infra/scripts/prepare-data-ebs.sh`
 - `compose.ec2.yaml`
 - `infra/README.md`
