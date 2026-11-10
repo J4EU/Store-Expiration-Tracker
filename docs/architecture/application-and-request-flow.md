@@ -43,7 +43,7 @@ Vite도 `/api` prefix를 제거한 뒤 FastAPI의 기존 route로 전달한다. 
 
 ## 현재 확인 범위
 
-이 문서는 repository의 Compose, Nginx, FastAPI, frontend 설정으로 확인되는 구조만 설명한다. production 도메인은 EC2용 Nginx 설정(`frontend/nginx.ec2.conf`)에서 확인한다. 실제 운영 환경변수 주입 여부는 이 repository만으로 확인되지 않는다.
+이 문서는 repository의 Compose, Nginx, FastAPI, frontend 설정으로 확인되는 구조만 설명한다. production 도메인은 EC2용 Nginx 설정(`frontend/nginx.ec2.conf`)에서 확인한다. EC2의 backend 환경변수는 `compose.ec2.yaml`의 `env_file`로 `deploy/prod/backend.env`에서 주입한다. 이 파일은 Git이 추적하지 않고 EC2에서만 작성하므로, 실제 운영 값은 이 repository만으로 확인되지 않는다.
 
 ## Source of truth
 

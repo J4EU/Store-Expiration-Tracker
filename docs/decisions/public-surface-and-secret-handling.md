@@ -11,7 +11,7 @@ production runtime 설정에서는 FastAPI의 `/docs`, `/openapi.json`, `/redoc`
 - `ADMIN_PASSWORD`
 - `SESSION_SECRET`
 
-secret 원문과 session cookie/token은 Git, 문서, 로그에 남기지 않는다. port, API path, CORS allowlist, cookie `Secure` 여부는 secret이 아니라 runtime configuration으로 다룬다. 다만 내부 host나 운영 구조를 드러내는 실제 값은 sensitive configuration으로 보고 공개 문서에 고정하지 않는다.
+secret 원문과 session cookie/token은 Git, 문서, 로그에 남기지 않는다. port, API path, CORS allowlist, cookie `Secure` 여부는 secret이 아니라 runtime configuration으로 다룬다. 다만 내부 host나 운영 구조를 드러내는 실제 값은 sensitive configuration으로 보고 공개 문서에 고정하지 않는다. production 도메인은 예외로 두고 문서와 설정에 그대로 적는다.
 
 production secret에는 개인 운영 계정과 실제 실행에 필요한 최소 주체만 접근하게 한다. 파일로 보관한다면 일반적으로 소유자 중심의 최소 권한을 적용하되, 이는 운영체제의 `root`까지 접근할 수 없다는 뜻은 아니다.
 
@@ -29,12 +29,15 @@ production secret에는 개인 운영 계정과 실제 실행에 필요한 최�
 
 API 문서 UI는 local development에서는 구현 확인에 유용하지만, production 외부 공개에 필요한 기능은 아니다. 또한 `ADMIN_PASSWORD`와 `SESSION_SECRET`은 각각 운영자 인증과 session 서명에 직접 영향을 주므로 일반 설정값과 분리해 취급한다.
 
+production 도메인은 DNS와 TLS 인증서로 이미 공개되는 값이라 숨겨서 얻는 이득이 작다. 이 repository는 오픈소스가 아니라 포트폴리오로 공개하므로, 도메인을 감추기보다 런북과 Nginx 설정에 실제 값을 그대로 두는 편이 읽고 실행하기 쉽다.
+
 ## 수용한 trade-off
 
 - `/api/health`는 Nginx와 prefix 제거 규칙에 의존한다. proxy 경계가 바뀌면 health check 경로도 함께 검증해야 한다.
 - `SESSION_SECRET`을 변경하면 기존 signed session은 모두 무효화된다.
 - `ADMIN_PASSWORD` 변경은 다음 애플리케이션 시작 시 운영자 계정 비밀번호에 반영된다.
-- 이 결정은 secret 저장·주입 기술을 확정하지 않는다. 실제 production에서 어떤 env 파일이나 주입 방식을 쓰는지는 repository만으로 확인되지 않는다.
+- 이 결정은 secret 저장·주입 기술을 확정하지 않는다. 현재 EC2에서는 Git이 추적하지 않는 `deploy/prod/backend.env`를 `compose.ec2.yaml`의 `env_file`로 주입한다.
+- production 도메인이 공개 repository에 남으므로, 도메인을 바꾸면 Nginx 설정과 런북을 함께 고쳐야 한다.
 - Secure cookie production 정책은 HTTPS에 의존한다. 현재 EC2용 Nginx 구성(`frontend/nginx.ec2.conf`)은 `443`에서 TLS를 종료하고 `80` 요청을 HTTPS로 리다이렉트한다.
 
 ## 재검토 조건
@@ -42,7 +45,7 @@ API 문서 UI는 local development에서는 구현 확인에 유용하지만, pr
 - 외부 API 소비자, 공개 시연, 별도 monitoring system이 추가될 때
 - health check에 인증 상태, 의존성 상태, 더 상세한 운영 정보를 포함해야 할 때
 - secret 회전, 접근 권한, 보관 위치에 대한 반복 가능한 운영 절차가 필요할 때
-- HTTPS와 실제 production 공개 구조를 도입하거나 변경할 때
+- production 도메인이나 TLS 구성 같은 공개 구조를 변경할 때
 
 현재 요청 경계와 `/api/health`의 전달 구조는 [Application and Request Flow](../architecture/application-and-request-flow.md)에서 다룬다. session의 선택과 한계는 [Operator Session Policy](operator-session-policy.md)를 따른다.
 
@@ -50,3 +53,4 @@ API 문서 UI는 local development에서는 구현 확인에 유용하지만, pr
 
 - [Issue #22](https://github.com/J4EU/Store-Expiration-Tracker/issues/22)
 - [PR #35](https://github.com/J4EU/Store-Expiration-Tracker/pull/35)
+- [Issue #105](https://github.com/J4EU/Store-Expiration-Tracker/issues/105): HTTPS 도입 뒤 재검토하고 production 도메인을 공개 값으로 정했다.
