@@ -83,8 +83,9 @@ Root EBS는 `delete_on_termination = true`를 유지한다. Data EBS는
 `prevent_destroy`를 건다.
 
 backend 블록에는 변수를 쓸 수 없어서, 각 레이어의 `backend "s3"`와
-`terraform_remote_state`에 버킷 이름을 직접 적는다. 버킷 이름을 바꾸면 이 값도 함께
-바꾼다.
+`terraform_remote_state`에 버킷 이름과 리전(`ap-northeast-2`)을 직접 적는다. 버킷
+이름이나 리전을 바꾸면 이 값도 함께 바꾼다. `aws_region` 변수는 AWS provider의 리전만
+정하고 state 위치에는 영향을 주지 않는다.
 
 `state-bucket` 레이어의 state는 버킷을 만드는 주체라 로컬에 둔다. 이 state를 잃어도 버킷과
 state 3개는 그대로 남아 서비스에 영향이 없고, `terraform import`로 다시 연결할 수 있다.
@@ -141,27 +142,6 @@ cp terraform.tfvars.example terraform.tfvars
 
 `terraform.tfvars`는 Git에 포함하지 않는다. SSH에 사용할 기존 키 페어는
 `key_pair_name`으로 지정하며, 기본값은 `j4eu-ec2`다.
-
-아래 절차는 로컬 backend를 쓰던 때의 기록이다. S3 backend에서는 `-state-out` 경로를
-그대로 쓸 수 없다.
-
-위 순서는 새 구성을 위한 것이다. 이전에 상위 `infra` state 안에서 Data EBS를 이미
-만들었다면 새 볼륨을 만들지 않는다. 기존 Data EBS 리소스의 state 소유권만 `data-ebs`
-레이어로 옮긴다.
-먼저 `data-ebs/terraform.tfvars.example`을 `data-ebs/terraform.tfvars`로 복사하고
-Data EBS의 Availability Zone을 입력한다. `data-ebs`를 초기화한 다음, 아래처럼
-해당 리소스의 state만 이동한다.
-
-```bash
-terraform -chdir=data-ebs init
-terraform state mv \
-  -state-out=data-ebs/terraform.tfstate \
-  aws_ebs_volume.sqlite_data \
-  aws_ebs_volume.sqlite_data
-```
-
-이동 뒤 `data-ebs`에서 `terraform plan`을 실행해 Data EBS의 재생성이 없음을
-확인하고, 상위 `infra`에서는 기존 attachment를 유지한 채 `terraform plan`을 실행한다.
 
 ## Terraform 실행
 
