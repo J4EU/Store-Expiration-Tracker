@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "AWS region for this manual deployment spike."
+  description = "AWS region for the EC2 deployment layer."
   type        = string
   default     = "ap-northeast-2"
 }
