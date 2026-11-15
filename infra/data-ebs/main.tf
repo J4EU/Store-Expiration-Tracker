@@ -23,7 +23,7 @@ provider "aws" {
 
 resource "aws_ebs_volume" "sqlite_data" {
   availability_zone = var.availability_zone
-  size              = 20
+  size              = 1
   type              = "gp3"
 
   lifecycle {
