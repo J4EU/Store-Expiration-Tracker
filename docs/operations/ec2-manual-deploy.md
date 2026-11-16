@@ -182,6 +182,8 @@ cd Store-Expiration-Tracker
 
 Nginx는 `/etc/letsencrypt/live/store.j4eu.dev/`의 인증서가 있어야 시작한다. 인증서는 certbot 컨테이너로 수동 DNS-01 발급한다. 실제 발급 전에 staging 인증서로 절차를 먼저 시험한다.
 
+기존 EC2를 지우고 다시 만드는 경우에는 기존 인증서를 백업했다가 새 EC2에 복원하고 이 단계를 건너뛸 수 있다. 절차는 [EC2 인증서 백업·복원](ec2-cert-backup-restore.md)을 따른다. 이 절차는 EC2를 다시 만들면 인증서가 사라지는 문제([Issue #96](https://github.com/J4EU/Store-Expiration-Tracker/issues/96))가 해결될 때까지만 쓰는 임시 절차다.
+
 ### 6-1. 도메인 연결 확인 [로컬]
 
 도메인의 A 레코드가 EIP를 가리키는지 확인한다.
