@@ -47,7 +47,7 @@ production 도메인은 DNS와 TLS 인증서로 이미 공개되는 값이라 �
 - secret 회전, 접근 권한, 보관 위치에 대한 반복 가능한 운영 절차가 필요할 때
 - production 도메인이나 TLS 구성 같은 공개 구조를 변경할 때
 
-현재 요청 경계와 `/api/health`의 전달 구조는 [Application and Request Flow](../architecture/application-and-request-flow.md)에서 다룬다. session의 선택과 한계는 [Operator Session Policy](operator-session-policy.md)를 따른다.
+현재 요청 경계와 `/api/health`의 전달 구조는 [Application and Request Flow](../application-and-request-flow.md)에서 다룬다. session의 선택과 한계는 [Operator Session Policy](operator-session-policy.md)를 따른다.
 
 ## References
 

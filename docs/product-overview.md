@@ -30,13 +30,13 @@ Store-Expiration-Tracker는 한 번 관리 대상으로 등록한 상품의 소�
 - 멀티 점포
 - 다중 사용자 및 역할 기반 권한 관리
 
-현재 운영자 접근 제어의 상세 정책은 [Operator Session Policy](../decisions/operator-session-policy.md)를 따른다.
+현재 운영자 접근 제어의 상세 정책은 [Operator Session Policy](decisions/operator-session-policy.md)를 따른다.
 
 ## 핵심 운영 흐름
 
 운영자는 바코드로 상품을 먼저 찾는다. 기존 상품이면 현재 소비기한을 갱신하고, 등록되지 않은 바코드일 때만 상품을 새로 등록한다.
 
-운영 화면에서는 오늘 처리할 상품과 현재 소비기한을 다시 확인해야 하는 상품을 확인한다. 처리 대상은 실제 폐기, 폐기 없음, 또는 아카이브 중 현재 상황에 맞는 결과로 이어진다. 각 결과의 상태 의미와 전이는 [Operating Rules](operating-rules.md)에 둔다.
+운영 화면에서는 오늘 처리할 상품과 현재 소비기한을 다시 확인해야 하는 상품을 확인한다. 처리 대상은 실제 폐기, 폐기 없음, 또는 아카이브 중 현재 상황에 맞는 결과로 이어진다. 각 결과의 상태 의미와 전이는 [Operating Rules](product-operating-rules.md)에 둔다.
 
 ## 폐기 데이터의 목적
 
@@ -46,6 +46,6 @@ Store-Expiration-Tracker는 한 번 관리 대상으로 등록한 상품의 소�
 
 ## 함께 읽을 문서
 
-- 현재 상태와 운영 규칙: [Operating Rules](operating-rules.md)
+- 현재 상태와 운영 규칙: [Operating Rules](product-operating-rules.md)
 - 제품 문제를 낳은 현장 관찰: [Product Problem Observation](product-problem-observation.md)
 - 실제 사용 후 초기 가설이 바뀐 과정: [Product Direction Pivot](product-direction-pivot.md)

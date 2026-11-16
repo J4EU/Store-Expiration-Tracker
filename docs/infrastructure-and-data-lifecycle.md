@@ -1,6 +1,6 @@
 # Infrastructure and Data Lifecycle
 
-이 문서는 현재 Terraform과 EC2용 Compose 파일이 만드는 EC2와 SQLite 데이터의 lifecycle 경계를 설명한다. Terraform 실행 방법과 shell 구현 세부사항은 `infra/`와 [infra/README.md](../../infra/README.md)를 기준으로 확인한다.
+이 문서는 현재 Terraform과 EC2용 Compose 파일이 만드는 EC2와 SQLite 데이터의 lifecycle 경계를 설명한다. Terraform 실행 방법과 shell 구현 세부사항은 `infra/`와 [infra/README.md](../infra/README.md)를 기준으로 확인한다.
 
 ## 책임 경계
 

@@ -21,7 +21,7 @@ Data EBS를 분리하면 OS, Docker, application checkout처럼 재구성 가능
 - Data EBS 분리는 backup이나 snapshot이 아니며, 운영자 실수, 애플리케이션 버그, filesystem 손상, 침해 사고에 대한 과거 시점 복원을 제공하지 않는다.
 - backup, snapshot, restore 전략은 현재 결정과 구현 범위에 포함하지 않는다.
 
-현재 filesystem 초기화와 mount 자동화의 동작은 Architecture 문서와 `infra/` 구현을 따른다. 이 문서는 그 절차를 복제하지 않는다.
+현재 filesystem 초기화와 mount 자동화의 동작은 [Infrastructure and Data Lifecycle](../infrastructure-and-data-lifecycle.md)과 `infra/` 구현을 따른다. 이 문서는 그 절차를 복제하지 않는다.
 
 ## 재검토 조건
 

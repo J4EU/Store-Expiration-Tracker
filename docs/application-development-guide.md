@@ -66,4 +66,4 @@ API contract가 바뀌면 `backend/app/main.py`와 `backend/app/schemas.py`만 �
 3. API 또는 schema 변경이면 Frontend 호출부와 OpenAPI 문서를 함께 확인한다.
 4. DB schema 변경이면 새 DB 초기화와 기존 DB에 대한 영향 범위를 별도로 검토한다.
 
-배포, Terraform, EC2/EBS, 실제 production 동작은 Development 문서의 source of truth가 아니다. 해당 작업은 관련 Infrastructure·Operations 문서와 설정을 기준으로 다룬다.
+배포, Terraform, EC2/EBS, 실제 production 동작은 이 문서의 source of truth가 아니다. 해당 작업은 관련 인프라·운영 문서와 설정을 기준으로 다룬다.

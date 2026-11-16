@@ -17,4 +17,4 @@
 - 그 결과 근무자는 이미 처리한 상품과 다시 확인할 상품을 기억에 의존하거나 진열대를 다시 전수 확인해야 했다.
 - 실제 점검은 모든 상품의 모든 소비기한을 미리 등록하는 방식이 아니라, 보통 가장 임박한 소비기한을 확인하고 처리한 뒤 다음 대상을 다시 확인하는 방식으로 이뤄졌다.
 
-이 관찰은 소비기한 정보가 사라질 때 상품별 관리 맥락까지 끊긴다는 제품 문제를 드러냈다. 현재 해결 방식과 운영 규칙은 [Product Overview](overview.md)와 [Operating Rules](operating-rules.md)에 둔다.
+이 관찰은 소비기한 정보가 사라질 때 상품별 관리 맥락까지 끊긴다는 제품 문제를 드러냈다. 현재 해결 방식과 운영 규칙은 [Product Overview](product-overview.md)와 [Operating Rules](product-operating-rules.md)에 둔다.

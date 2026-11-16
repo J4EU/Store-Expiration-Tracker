@@ -64,13 +64,13 @@ npm run dev
 
 로컬 개발에서는 프론트가 `/api/...`로 요청하고, Vite dev server가 `/api` prefix를 제거해 `http://localhost:8000/...`으로 프록시합니다. FastAPI 라우트는 현재처럼 `/auth/login`, `/dashboard`, `/products` 등을 유지합니다.
 
-현재 제품은 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Application and Request Flow](docs/architecture/application-and-request-flow.md)에 정리합니다.
+현재 제품은 공식 화면 URL을 `/` 하나로 둡니다. SPA fallback과 `/api` 경로 기준은 [Application and Request Flow](docs/application-and-request-flow.md)에 정리합니다.
 
-운영과 유사한 로컬 Compose 경로의 현재 구조는 [Application and Request Flow](docs/architecture/application-and-request-flow.md)에 정리합니다. 당시 로컬 검증 증거는 [PR #42](https://github.com/J4EU/Store-Expiration-Tracker/pull/42)에 남아 있습니다.
+운영과 유사한 로컬 Compose 경로의 현재 구조는 [Application and Request Flow](docs/application-and-request-flow.md)에 정리합니다. 당시 로컬 검증 증거는 [PR #42](https://github.com/J4EU/Store-Expiration-Tracker/pull/42)에 남아 있습니다.
 
 ### 로컬 최소 배포 경로 구성 및 검증
 
-frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결한 현재 요청 경계는 [Application and Request Flow](docs/architecture/application-and-request-flow.md)를 참고합니다. 실제 운영 절차와 production 검증은 이 문서가 다루지 않습니다.
+frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결한 현재 요청 경계는 [Application and Request Flow](docs/application-and-request-flow.md)를 참고합니다. 실제 운영 절차와 production 검증은 이 문서가 다루지 않습니다.
 
 처음 확인할 때는 `등록 시작 -> 바코드 조회 -> 소비기한 반영 -> 오늘 처리/미확인 확인` 순서로 보면 됩니다.
 
@@ -82,7 +82,7 @@ frontend, 외부 진입점, FastAPI, SQLite를 Compose로 연결한 현재 요�
 
 핵심은 단순히 소비기한 날짜를 저장하는 것이 아니라, 한 번 관리 대상으로 올린 상품이 지금 `확인됨` 상태인지 `미확인` 상태인지가 시스템에 계속 남아 있도록 만드는 것입니다.
 
-현재 Product의 문제·범위·운영 규칙은 [Product Overview](docs/product/overview.md)와 [Product Operating Rules](docs/product/operating-rules.md)를 참고하세요. 초기 가설이 실제 등록 작업 뒤 어떻게 바뀌었는지는 [Product Direction Pivot](docs/product/product-direction-pivot.md)에 남겨 두었습니다.
+현재 Product의 문제·범위·운영 규칙은 [Product Overview](docs/product-overview.md)와 [Product Operating Rules](docs/product-operating-rules.md)를 참고하세요. 초기 가설이 실제 등록 작업 뒤 어떻게 바뀌었는지는 [Product Direction Pivot](docs/product-direction-pivot.md)에 남겨 두었습니다.
 
 ## 현재 범위
 
