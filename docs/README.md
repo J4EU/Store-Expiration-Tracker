@@ -37,6 +37,7 @@
 
 - [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md)
 - [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md)
+- [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md)
 
 ## Process
 
