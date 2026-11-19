@@ -54,10 +54,10 @@
 - 복구하면 상품은 다시 active가 되고, 현재 소비기한은 `미확인` 상태로 둔다.
 - 기존 실제 폐기 이력은 아카이브와 복구 뒤에도 유지된다.
 
-왜 삭제 대신 보존하고 자동 아카이브를 선택하지 않는지는 [Product Retention and Archiving](../decisions/product-retention-and-archiving.md)를 따른다. 실제 폐기 이력의 범위는 [Discard History Scope](../decisions/discard-history-scope.md)를 따른다.
+왜 삭제 대신 보존하고 자동 아카이브를 선택하지 않는지는 [Product Retention and Archiving](decisions/product-retention-and-archiving.md)를 따른다. 실제 폐기 이력의 범위는 [Discard History Scope](decisions/discard-history-scope.md)를 따른다.
 
 ## 구현 경계
 
-- 정확한 table, column, constraint, trigger, index: [`backend/db/schema.sql`](../../backend/db/schema.sql)
-- 정확한 API 동작과 입력 validation: [`backend/app/main.py`](../../backend/app/main.py), [`backend/app/schemas.py`](../../backend/app/schemas.py)
-- 실제 화면과 interaction: [`frontend/src/`](../../frontend/src/)
+- 정확한 table, column, constraint, trigger, index: [`backend/db/schema.sql`](../backend/db/schema.sql)
+- 정확한 API 동작과 입력 validation: [`backend/app/main.py`](../backend/app/main.py), [`backend/app/schemas.py`](../backend/app/schemas.py)
+- 실제 화면과 interaction: [`frontend/src/`](../frontend/src/)

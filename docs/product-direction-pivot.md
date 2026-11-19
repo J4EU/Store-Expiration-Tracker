@@ -1,6 +1,6 @@
 # Product Direction Pivot
 
-이 문서는 초기 제품 가설이 실제 등록 작업을 거치며 왜 어떤 방향으로 바뀌었는지 기록한다. 현재 Product spec은 [Overview](overview.md)와 [Operating Rules](operating-rules.md)가 기준이다.
+이 문서는 초기 제품 가설이 실제 등록 작업을 거치며 왜 어떤 방향으로 바뀌었는지 기록한다. 현재 Product spec은 [Overview](product-overview.md)와 [Operating Rules](product-operating-rules.md)가 기준이다.
 
 ## 초기 가설
 

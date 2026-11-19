@@ -1,46 +1,15 @@
 # Documentation
 
-이 폴더는 문서 유형보다 주제를 기준으로 나눕니다.
+결정 기록은 `decisions/`, 운영 절차는 `operations/`에 두고, 나머지 문서는 분류하지 않고 이 폴더에 바로 둡니다.
 
-## Product
-
-현재 제품 문제·범위·운영 규칙과 제품이 출발한 역사적 맥락을 다룹니다.
-
-- [Product Overview](product/overview.md)
-- [Product Operating Rules](product/operating-rules.md)
-- [Product Problem Observation](product/product-problem-observation.md)
-- [Product Direction Pivot](product/product-direction-pivot.md)
-
-## Development
-
-로컬 개발환경 실행과 애플리케이션 코드 탐색 방법을 다룹니다.
-
-- [Local Development](development/local-development.md)
-- [Application Development Guide](development/application-development-guide.md)
-
-## Decisions
-
-현재 적용되는 중요한 결정과 재검토 조건을 다룹니다.
-
-- [Decisions](decisions/README.md)
-
-## Architecture
-
-현재 애플리케이션 요청 흐름과 인프라·데이터 lifecycle 경계를 다룹니다.
-
-- [Application and Request Flow](architecture/application-and-request-flow.md)
-- [Infrastructure and Data Lifecycle](architecture/infrastructure-and-data-lifecycle.md)
-
-## Operations
-
-배포 환경을 준비하고 운영하는 절차를 다룹니다.
-
-- [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md)
-- [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md)
-- [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md)
-
-## Process
-
-저장소 작업 흐름과 main 보호 정책을 다룹니다.
-
-- [Project Workflow](process/project-workflow.md)
+| 결정 (`decisions/`) | 운영 (`operations/`) | 그 밖의 문서 |
+| --- | --- | --- |
+| [Decisions](decisions/README.md) | [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md) | [Product Overview](product-overview.md) |
+| [Technology Stack](decisions/technology-stack.md) | [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md) | [Product Operating Rules](product-operating-rules.md) |
+| [Operator Session Policy](decisions/operator-session-policy.md) | [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md) | [Product Problem Observation](product-problem-observation.md) |
+| [Same-Origin API Boundary](decisions/same-origin-api-boundary.md) | | [Product Direction Pivot](product-direction-pivot.md) |
+| [Public Surface and Secret Handling](decisions/public-surface-and-secret-handling.md) | | [Local Development](local-development.md) |
+| [Data EBS Lifecycle](decisions/data-ebs-lifecycle.md) | | [Application Development Guide](application-development-guide.md) |
+| [Product Retention and Archiving](decisions/product-retention-and-archiving.md) | | [Application and Request Flow](application-and-request-flow.md) |
+| [Discard History Scope](decisions/discard-history-scope.md) | | [Infrastructure and Data Lifecycle](infrastructure-and-data-lifecycle.md) |
+| | | [Project Workflow](project-workflow.md) |
