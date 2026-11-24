@@ -48,7 +48,8 @@ backlog 이슈
 
 - 유형, 제목, 본문 초안을 사용자에게 보여주고, 승인 전에는 Issue를 생성하지 않는다.
 - 사용자가 수정을 요청하면 반영한 초안을 다시 보여주고 승인을 받는다.
-- 승인 후 `gh issue create --title "<제목>" --body-file <파일>`로 생성한다. backlog 이슈는 `--label backlog`를 붙인다.
+- 승인 후 `gh issue create --title "<제목>" --body-file <파일>`로 생성한다. 상태 라벨은 붙이지 않고 담당자도 지정하지 않는다.
+- 생성한 뒤 7번 방법으로 구현 이슈는 Todo, backlog 이슈는 Backlog로 설정한다.
 
 ## 6. backlog 이슈 검토 결과 반영
 
@@ -57,10 +58,24 @@ backlog 이슈
 작업하기로 정한 경우
 - 이슈를 닫지 않는다. 본문을 구현 이슈 템플릿으로 다시 쓰고, 기존 `## 설명`의 내용은 `문제 상황`에 녹인다. 작성 방법은 2·3번의 구현 이슈 규칙을 따른다.
 - 제목은 4번의 구현 이슈 기준으로 다시 쓴다.
-- 본문을 고치면서 `backlog` 라벨을 뗀다. 검토 중 정한 것, 미정, 근거처럼 남길 내용이 있으면 이때 코멘트를 쓸 수 있다.
+- 본문을 고치면서 7번 방법으로 Status를 Todo로 바꾼다. 검토 중 정한 것, 미정, 근거처럼 남길 내용이 있으면 이때 코멘트를 쓸 수 있다.
 - 작업이 여러 개로 나뉘면 주된 작업은 이 이슈에서 구체화하고, 나머지만 새 구현 이슈로 만든다. 새 이슈는 코멘트에 체크리스트로 적고, 이슈가 생성된 항목만 체크한다.
 
 작업하지 않기로 정한 경우
-- `## 최종 정리` 아래에 결론을 쓴 코멘트를 남기고 닫는다. 라벨은 그대로 둔다.
+- `## 최종 정리` 아래에 결론을 쓴 코멘트를 남기고 `gh issue close <번호> --reason "not planned"`로 닫는다. 닫은 뒤 Status가 Not planned인지 확인한다.
 
-제목·본문·코멘트 초안을 사용자에게 보여주고, 승인 후 `gh issue edit <번호> --title "<제목>" --body-file <파일> --remove-label backlog`, `gh issue comment <번호> --body-file <파일>`로 반영한다. 이슈를 닫는 것도 사용자 승인 후에 한다.
+제목·본문·코멘트 초안을 사용자에게 보여주고, 승인 후 `gh issue edit <번호> --title "<제목>" --body-file <파일>`, `gh issue comment <번호> --body-file <파일>`로 반영한다. 이슈를 닫는 것도 사용자 승인 후에 한다.
+
+## 7. Status 설정
+
+Status ID는 이름으로 조회해서 쓴다. `Todo` 자리에 설정할 Status 이름을 넣고, 출력된 Status가 맞는지 확인한다.
+
+```bash
+number=<번호>
+name="Todo"
+issue_id=$(gh issue view "${number}" --json id --jq .id)
+status_id=$(gh api graphql -F owner='{owner}' -F repo='{repo}' -f query='query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){planningStatuses(first:20){nodes{id name}}}}' \
+  --jq ".data.repository.planningStatuses.nodes[] | select(.name == \"${name}\") | .id")
+gh api graphql -f issue="${issue_id}" -f status="${status_id}" -f query='mutation($issue:ID!,$status:ID!){setIssueStatus(input:{issueId:$issue,statusId:$status}){clientMutationId}}'
+gh api "repos/{owner}/{repo}/issues/${number}" --jq .status.name
+```
