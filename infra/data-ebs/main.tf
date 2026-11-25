@@ -21,6 +21,13 @@ provider "aws" {
   region = var.aws_region
 }
 
+locals {
+  # DLM은 이 태그가 붙은 볼륨을 찍고, Recycle Bin은 이 태그가 붙은 스냅샷을 보존한다.
+  backup_tags = {
+    Backup = "${var.name_prefix}-sqlite-data"
+  }
+}
+
 resource "aws_ebs_volume" "sqlite_data" {
   availability_zone = var.availability_zone
   size              = 1
@@ -31,6 +38,7 @@ resource "aws_ebs_volume" "sqlite_data" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-sqlite-data"
+    Name   = "${var.name_prefix}-sqlite-data"
+    Backup = local.backup_tags.Backup
   }
 }
