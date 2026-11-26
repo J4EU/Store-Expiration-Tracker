@@ -54,12 +54,13 @@ resource "aws_dlm_lifecycle_policy" "sqlite_data" {
       }
     }
 
-    # 매월 1일 18:00 UTC, 즉 2일 03:00 KST에 찍어 1일 업무분까지 담는다.
+    # 매월 말일(L) 18:00 UTC, 즉 다음 달 1일 03:00 KST에 찍어 전월 말일 업무분까지 담는다.
+    # DLM은 시간대를 지정할 수 없어 UTC 말일로 KST 1일을 맞춘다.
     schedule {
       name = "monthly-12-months"
 
       create_rule {
-        cron_expression = "cron(0 18 1 * ? *)"
+        cron_expression = "cron(0 18 L * ? *)"
       }
 
       retain_rule {
