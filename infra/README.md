@@ -172,6 +172,29 @@ S3의 `data-ebs/terraform.tfstate`를 지우거나 옮기지 않는다. `eip` �
 remote state를 읽으므로, `eip/terraform.tfstate`와 `allocation_id` output에 대해 같은
 규칙이 적용된다.
 
+## tflint로 정적 검사
+
+apply 전에 오류가 날 수 있는 값, 낡은 문법, 안 쓰는 선언을 찾도록 [tflint]를 쓴다.
+규칙은 `.tflint.hcl`에 있으며, 내장 terraform 룰셋의 `recommended` 프리셋과 AWS
+룰셋을 기본 규칙 그대로 켠다. 아래 명령은 `infra/` 디렉터리에서 실행한다.
+
+```bash
+brew install --cask terraform-linters/tap/tflint
+tflint --init
+tflint --recursive --config "$(pwd)/.tflint.hcl"
+```
+
+`tflint --init`은 `.tflint.hcl`에 선언한 AWS 룰셋 플러그인을 내려받으며, 처음 한 번과
+플러그인 버전을 바꿨을 때만 실행하면 된다.
+
+`--recursive`는 각 레이어 디렉터리로 들어가 검사하므로 설정 파일도 그 디렉터리에서
+찾는다. `--config`를 생략하면 `data-ebs`, `eip`, `state-bucket`은 `.tflint.hcl`을 찾지
+못하고 AWS 룰셋 없이 기본 설정으로 검사된다. 그래서 설정 파일을 절대 경로로 넘긴다.
+
+지적 사항이 없으면 아무것도 출력하지 않고 종료 코드 `0`으로 끝난다.
+
+[tflint]: https://github.com/terraform-linters/tflint
+
 ## Data EBS와 Compose 연결
 
 EC2 최초 부팅 시 `/dev/sdf`로 연결된 Data EBS가 나타날 때까지 기다린다. 파일시스템이
