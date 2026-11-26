@@ -7,9 +7,10 @@
 | [ADR-0001: 앞으로 결정 문서 초안은 직접 적는다](adr/0001-write-decision-drafts-by-hand.md) | [Decisions](decisions/README.md) | [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md) | [Product Overview](product-overview.md) |
 | [ADR 템플릿](adr/template.md) | [Technology Stack](decisions/technology-stack.md) | [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md) | [Product Operating Rules](product-operating-rules.md) |
 | | [Operator Session Policy](decisions/operator-session-policy.md) | [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md) | [Product Problem Observation](product-problem-observation.md) |
-| | [Same-Origin API Boundary](decisions/same-origin-api-boundary.md) | | [Product Direction Pivot](product-direction-pivot.md) |
+| | [Same-Origin API Boundary](decisions/same-origin-api-boundary.md) | [Data EBS 스냅샷 복원](operations/data-ebs-snapshot-restore.md) | [Product Direction Pivot](product-direction-pivot.md) |
 | | [Public Surface and Secret Handling](decisions/public-surface-and-secret-handling.md) | | [Local Development](local-development.md) |
 | | [Data EBS Lifecycle](decisions/data-ebs-lifecycle.md) | | [Application Development Guide](application-development-guide.md) |
 | | [Product Retention and Archiving](decisions/product-retention-and-archiving.md) | | [Application and Request Flow](application-and-request-flow.md) |
 | | [Discard History Scope](decisions/discard-history-scope.md) | | [Infrastructure and Data Lifecycle](infrastructure-and-data-lifecycle.md) |
 | | | | [Project Workflow](project-workflow.md) |
+| | | | [Data EBS 백업·복구 전략](data-ebs-backup-and-recovery.md) |

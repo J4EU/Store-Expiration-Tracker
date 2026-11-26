@@ -13,7 +13,9 @@ infra/eip/      (EIP state)      -- allocation_id  -->  ├─ EC2에 Data EBS �
 
 - `state-bucket` 레이어는 나머지 세 레이어의 Terraform state를 저장할 S3 버킷만 생성하고
   보존한다.
-- `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS만 생성하고 보존한다.
+- `data-ebs` 레이어는 SQLite 파일을 보관할 Data EBS와 그 스냅샷 정책(DLM 정책, DLM용
+  IAM 역할, Recycle Bin 규칙)을 생성하고 보존한다. 스냅샷 구성과 복구 규칙은
+  [Data EBS 백업·복구 전략](../docs/data-ebs-backup-and-recovery.md)에 정리한다.
 - `eip` 레이어는 도메인 A 레코드에 등록할 고정 공인 IPv4인 Elastic IP만 생성하고
   보존한다.
 - 이 디렉터리의 상위 `infra` 레이어는 EC2·보안 그룹과, Data EBS·EIP를 EC2에 연결하는

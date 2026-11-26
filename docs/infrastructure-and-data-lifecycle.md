@@ -49,7 +49,7 @@ EC2 layer를 교체해도 Data EBS와 Data EBS layer state가 보존되어 있�
 - **EC2 replacement survival**: 기존 Data EBS를 새 EC2에 다시 연결해, EC2 교체 뒤에도 그 EBS의 데이터를 계속 사용하는 성질이다.
 - **Backup / snapshot**: 데이터가 손상되거나 잘못 변경됐을 때 신뢰할 수 있는 과거 상태로 되돌릴 별도 사본이다.
 
-현재 Data EBS 분리는 앞의 두 경계를 제공하기 위한 구성이다. backup이나 snapshot 전략, 그리고 그것을 이용한 복원 절차는 현재 구현 범위에 포함하지 않는다.
+Data EBS 분리는 앞의 두 경계를 제공하기 위한 구성이다. 세 번째 경계인 backup은 `infra/data-ebs`의 DLM 정책이 만드는 Data EBS 스냅샷으로 제공한다. 스냅샷 구성과 복구 규칙은 [Data EBS 백업·복구 전략](data-ebs-backup-and-recovery.md), 복원 명령은 [Data EBS 스냅샷 복원](operations/data-ebs-snapshot-restore.md)을 따른다.
 
 ## 현재 확인 범위
 

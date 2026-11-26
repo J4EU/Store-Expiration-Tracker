@@ -17,7 +17,8 @@
 
 - 인증서 보관 위치와 갱신 방식 ([Issue #92](https://github.com/J4EU/Store-Expiration-Tracker/issues/92))
 - 시크릿 주입 방식 고도화 ([Issue #65](https://github.com/J4EU/Store-Expiration-Tracker/issues/65))
-- 이미지 registry, 배포 자동화, 백업·복원
+- 이미지 registry, 배포 자동화
+- Data EBS 백업·복원 ([Data EBS 백업·복구 전략](../data-ebs-backup-and-recovery.md), [Data EBS 스냅샷 복원](data-ebs-snapshot-restore.md))
 
 명령의 실행 위치는 각 단계 제목에 `[로컬]`, `[EC2]`, `[Cloudflare]`로 표시한다.
 
@@ -57,7 +58,7 @@ terraform -chdir=infra/state-bucket apply
 terraform -chdir=infra/data-ebs output data_volume_id
 ```
 
-Data EBS가 아직 없을 때만 새로 만든다.
+Data EBS가 아직 없을 때만 새로 만든다. 이 apply는 Data EBS와 함께 스냅샷 정책(DLM 정책, DLM용 IAM 역할, Recycle Bin 규칙)도 만든다.
 
 ```bash
 cp infra/data-ebs/terraform.tfvars.example infra/data-ebs/terraform.tfvars
@@ -346,6 +347,8 @@ sudo ls -l /srv/store-expiration-tracker/data
 ## 10. EC2 stop/start 후 재기동
 
 EC2를 start해도 컨테이너는 자동으로 시작되지 않는다. public IP는 EIP이므로 stop/start 뒤에도 바뀌지 않는다. 인증서도 루트 볼륨에 남아 있어 다시 발급하지 않는다.
+
+Data EBS 스냅샷은 매일 03:00(KST)에 찍히고, EC2가 stop된 상태에서 찍혀야 한다. 업무가 끝나면 03:00 전에 EC2를 stop한다.
 
 [EC2] SSH로 접속해 mount를 확인한 뒤 실행한다.
 
