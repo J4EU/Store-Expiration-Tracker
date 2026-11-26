@@ -29,10 +29,6 @@ locals {
   subnet_id = sort(data.aws_subnets.data_volume_availability_zone.ids)[0]
 }
 
-data "aws_subnet" "deployment" {
-  id = local.subnet_id
-}
-
 data "terraform_remote_state" "data_ebs" {
   backend = "s3"
 
