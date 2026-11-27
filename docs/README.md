@@ -5,8 +5,8 @@
 | ADR (`adr/`) | 기존 결정 (`decisions/`) | 운영 (`operations/`) | 그 밖의 문서 |
 | --- | --- | --- | --- |
 | [ADR-0001: 앞으로 결정 문서 초안은 직접 적는다](adr/0001-write-decision-drafts-by-hand.md) | [Decisions](decisions/README.md) | [EC2 Manual Deploy Runbook](operations/ec2-manual-deploy.md) | [Product Overview](product-overview.md) |
-| [ADR 템플릿](adr/template.md) | [Technology Stack](decisions/technology-stack.md) | [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md) | [Product Operating Rules](product-operating-rules.md) |
-| | [Operator Session Policy](decisions/operator-session-policy.md) | [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md) | [Product Problem Observation](product-problem-observation.md) |
+| [ADR-0002: RPO는 최대 한 회차로 확정하고 RTO 대신 시각 기준 복구 규칙을 쓴다](adr/0002-set-rpo-to-one-session-and-use-time-based-recovery-rules.md) | [Technology Stack](decisions/technology-stack.md) | [EC2 Manual Deploy Measurement](operations/ec2-manual-deploy-measurement.md) | [Product Operating Rules](product-operating-rules.md) |
+| [ADR 템플릿](adr/template.md) | [Operator Session Policy](decisions/operator-session-policy.md) | [EC2 인증서 백업·복원](operations/ec2-cert-backup-restore.md) | [Product Problem Observation](product-problem-observation.md) |
 | | [Same-Origin API Boundary](decisions/same-origin-api-boundary.md) | [Data EBS 스냅샷 복원](operations/data-ebs-snapshot-restore.md) | [Product Direction Pivot](product-direction-pivot.md) |
 | | [Public Surface and Secret Handling](decisions/public-surface-and-secret-handling.md) | | [Local Development](local-development.md) |
 | | [Data EBS Lifecycle](decisions/data-ebs-lifecycle.md) | | [Application Development Guide](application-development-guide.md) |
