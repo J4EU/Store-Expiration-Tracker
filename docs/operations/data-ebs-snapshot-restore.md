@@ -4,7 +4,7 @@
 
 ## 전제
 
-- 복구 규칙에 따라 03:00 전에는 EC2를 stop한다. 그날 03:00 DLM 스냅샷이 stop 상태에서 찍히게 하기 위해서다.
+- 복구 규칙에 따라 03:00 전까지 EC2 stop을 끝낸다. 그날 03:00 DLM 스냅샷이 stop 상태에서 찍히게 하기 위해서다.
 - 로컬에서 `infra/`와 `infra/data-ebs/`의 Terraform을 실행할 수 있다.
 - EC2에는 `sqlite3`가 없다. DB는 backend 이미지(Python 3.12)의 `sqlite3` 모듈로 연다. SQL은 대화형 셸에 입력하지 말고, 명령 한 번으로 실행한다. 대화형 셸에서 한글 입력기 상태로 입력하다가 깨진 바이트가 섞여 셸이 종료된 적이 있다.
 
@@ -22,6 +22,15 @@ EC2 stop → 새 볼륨 생성 → data-ebs state 교체 → infra apply로 연�
 ### 0. 준비 [로컬]
 
 사용할 스냅샷과 기존 볼륨 ID를 적어 둔다. 새 볼륨은 EC2와 같은 AZ에 만들어야 연결할 수 있다.
+
+먼저 후보 스냅샷을 시각순으로 본다. 사고 전 시각에 시작했고 상태가 `completed`인 스냅샷을 고른다. 볼륨을 교체한 적이 있으면 다른 볼륨의 스냅샷이 섞여 있을 수 있으므로 `VolumeId`도 함께 본다.
+
+```bash
+aws ec2 describe-snapshots --owner-ids self --region ap-northeast-2 \
+  --filters Name=tag:Backup,Values=store-expiration-tracker-sqlite-data \
+  --query 'sort_by(Snapshots,&StartTime)[].[SnapshotId,StartTime,State,VolumeId]' \
+  --output table
+```
 
 ```bash
 cd infra
@@ -70,7 +79,11 @@ terraform -chdir=data-ebs import aws_ebs_volume.sqlite_data "$NEW_VOL"
 terraform -chdir=data-ebs plan
 ```
 
-plan에 볼륨 교체(`must be replaced`)나 삭제가 있으면 멈춘다. `No changes`가 목표다. import만 하면 output이 갱신되지 않을 수 있으므로, plan에 output 변경만 있으면 apply한다.
+plan이 아래 중 하나일 때만 apply한다. 그 밖의 변경(생성, 교체, 삭제, 다른 속성 변경)이 하나라도 있으면 멈춘다. 특히 `will be created`가 보이면 `import`가 실패해 state가 빈 것이므로, apply하면 빈 볼륨이 새로 만들어진다.
+
+- `No changes`
+- output 변경만 있다. import만 하면 output이 갱신되지 않을 수 있다.
+- 되돌리기 중이고, `OLD_VOL`의 `Backup` 태그와 `Name`을 원래대로 되돌리는 태그 변경만 있다.
 
 ```bash
 terraform -chdir=data-ebs apply
@@ -153,7 +166,9 @@ aws ec2 list-snapshots-in-recycle-bin
 aws ec2 restore-snapshot-from-recycle-bin --snapshot-id <snapshot-id>
 ```
 
-되살린 스냅샷은 `completed` 상태로 돌아오고, `Backup`·DLM 태그와 만료 예정 시각도 지우기 전과 같다. DLM이 계속 관리한다.
+실수로 지운 스냅샷을 되살리면 `completed` 상태로 돌아오고, `Backup`·DLM 태그와 만료 예정 시각도 지우기 전과 같다. DLM이 계속 관리한다.
+
+보관 기간이 지나 DLM이 지운 스냅샷도 Recycle Bin에 들어간다. AWS 문서에 따르면 이런 스냅샷을 되살리면 DLM이 더는 관리하지 않으므로, 쓰고 나면 직접 지워야 한다. 이 경우는 실제로 확인하지 않았다. 되살린 뒤에는 바로 볼륨을 만들어 쓰고, 스냅샷을 남겨 둔다면 지울 시점을 정해 둔다.
 
 ## 복원 테스트 기록
 
